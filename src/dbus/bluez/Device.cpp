@@ -4,11 +4,11 @@
 namespace DBus::Bluez
 {
   Device::Device(const QDBusObjectPath &path, const InterfaceMap &interfaces, QObject *parent)
-    : DBus::Bluez::Object{ "org.bluez.Device1", path, interfaces, parent }
+    : Object{ InterfaceName, path, interfaces, parent }
   {}
 
   Device::Device(const QDBusObjectPath &path, const PropertyMap &properties, QObject *parent)
-    : DBus::Bluez::Object{ "org.bluez.Device1", path, properties, parent }
+    : Object{ InterfaceName, path, properties, parent }
   {}
 
   bool Device::paired() const { return property<bool>("Paired"); }
@@ -67,10 +67,10 @@ namespace DBus::Bluez
       break;
     }
 
-    qDebug() << "Property changed:"
-             << m_path.path()
-             << name
-             << "changed to"
-             << value;
+    // qDebug() << "Property changed:"
+    //          << m_path.path()
+    //          << name
+    //          << "changed to"
+    //          << value;
   }
 }

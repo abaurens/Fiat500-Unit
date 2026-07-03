@@ -8,6 +8,9 @@
 
 namespace DBus::Bluez
 {
+  class Device;
+  using DeviceMap = QMap<QDBusObjectPath, Device *>;
+
   class Device : public Object
   {
     Q_OBJECT
@@ -34,6 +37,9 @@ namespace DBus::Bluez
       DECL_DBUS_PROPERTY(Blocked),
       DECL_DBUS_PROPERTY(ServicesResolved)
     };
+
+  public:
+    static constexpr Name InterfaceName = "org.bluez.Device1";
 
   public:
     explicit Device(const QDBusObjectPath &path,

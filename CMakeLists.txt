@@ -29,11 +29,19 @@ qt_add_executable(Fiat500-Unit
     src/Scope.hpp
     src/MainWindow.cpp
     src/MainWindow.hpp
+
     src/dbus/Types.hpp src/dbus/Types.cpp
+
     src/dbus/bluez/Object.hpp src/dbus/bluez/Object.cpp
     src/dbus/bluez/Device.hpp src/dbus/bluez/Device.cpp
     src/dbus/bluez/Adapter.hpp src/dbus/bluez/Adapter.cpp
-    src/dbus/bluez/BluetoothManager.hpp src/dbus/bluez/BluetoothManager.cpp
+    src/dbus/bluez/Manager.hpp src/dbus/bluez/Manager.cpp
+
+    src/widgets/sizes.hpp
+
+    src/widgets/LogPanel.hpp src/widgets/LogPanel.cpp
+    src/widgets/DevicePanel.hpp src/widgets/DevicePanel.cpp
+    src/widgets/AdapterPanel.hpp src/widgets/AdapterPanel.cpp
 )
 
 qt_add_translations(

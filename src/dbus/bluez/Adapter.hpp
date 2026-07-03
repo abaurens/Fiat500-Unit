@@ -30,6 +30,8 @@ namespace DBus::Bluez
       DECL_DBUS_PROPERTY(Alias),
       DECL_DBUS_PROPERTY(Address)
     };
+  public:
+    static constexpr Name InterfaceName = "org.bluez.Adapter1";
 
   public:
     explicit Adapter(const QDBusObjectPath &path,
@@ -42,10 +44,12 @@ namespace DBus::Bluez
 
     bool powered() const;
     bool discoverable() const;
+    bool discovering() const;
 
     QString alias() const;
     QString address() const;
 
+  public slots:
     QDBusPendingReply<> setPowered(bool);
     QDBusPendingReply<> setDiscoverable(bool);
     QDBusPendingReply<> setAlias(const QString &alias);

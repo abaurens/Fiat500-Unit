@@ -22,7 +22,7 @@ namespace DBus::Bluez
 
   void Object::updateProperties(const QString &interface, const PropertyMap &properties, const QStringList &invalidated)
   {
-    qDebug() << "Interface:  " << interface;
+    // qDebug() << "Interface:  " << interface;
     // qDebug() << "Invalidated:" << invalidated;
     // qDebug() << "Properties: ";
 
@@ -32,7 +32,7 @@ namespace DBus::Bluez
       const QVariant oldValue = m_properties.value(propertyName);
       const QVariant &newValue = it.value();
 
-      qDebug() << "  [" << propertyName << "] = " << newValue << " (was" << oldValue << ")";
+      // qDebug() << "  [" << propertyName << "] = " << newValue << " (was" << oldValue << ")";
 
       if (oldValue != newValue)
       {

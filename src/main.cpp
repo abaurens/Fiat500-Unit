@@ -1,15 +1,13 @@
-// #include "MainWindow.hpp"
+#include "dbus/bluez/Manager.hpp"
+#include "dbus/Types.hpp"
+
+#include "MainWindow.hpp"
 
 #include <QApplication>
 #include <QTranslator>
 #include <QLocale>
 
-#include "dbus/bluez/BluetoothManager.hpp"
-#include "dbus/Types.hpp"
-
-
-
-#include "MainWindow.hpp"
+using BluetoothManager = DBus::Bluez::Manager;
 
 int main(int argc, char *argv[])
 {
@@ -27,25 +25,10 @@ int main(int argc, char *argv[])
   //  }
   //}
 
-
   registerDBusTypes();
-  BluetoothManager manager;
-  manager.initialize();
-
-
-
+  DBus::Bluez::Manager::initialize();
 
   MainWindow w;
-
-  w.connect(
-    &w, &MainWindow::nameChanged,
-    [&manager](const QString &name) { manager.adapter()->setAlias(name); }
-  );
-
-  w.connect(
-    &w, &MainWindow::discClicked,
-    [&manager]() { manager.adapter()->setDiscoverable(!manager.adapter()->discoverable()); }
-  );
 
   w.show();
   return QApplication::exec();

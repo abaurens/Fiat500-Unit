@@ -5,6 +5,7 @@
 #include <QDBusVariant>
 #include <QDBusArgument>
 #include <QDBusObjectPath>
+#include <QStringView>
 
 // #include <concepts>
 
@@ -32,9 +33,14 @@ namespace DBus
     template<class... Args>
     constexpr Name(Args &&... args) : std::string_view(std::forward<Args>(args)...) {}
 
-    operator QString() const
+    QString toQString() const
     {
       return QString(data());
+    }
+
+    operator QString() const
+    {
+      return toQString();
     }
   };
 

@@ -3,11 +3,11 @@
 namespace DBus::Bluez
 {
   Adapter::Adapter(const QDBusObjectPath &path, const InterfaceMap &interfaces, QObject *parent)
-    : DBus::Bluez::Object{ "org.bluez.Adapter1", path, interfaces, parent }
+    : Object{ InterfaceName, path, interfaces, parent }
   {}
 
   Adapter::Adapter(const QDBusObjectPath &path, const PropertyMap &properties, QObject *parent)
-    : DBus::Bluez::Object{ "org.bluez.Adapter1", path, properties, parent }
+    : Object{ InterfaceName, path, properties, parent }
   {}
 
   QString Adapter::address() const { return property<QString>("Address"); }
@@ -15,6 +15,7 @@ namespace DBus::Bluez
 
   bool Adapter::powered() const { return property<bool>("Powered"); }
   bool Adapter::discoverable() const { return property<bool>("Discoverable"); }
+  bool Adapter::discovering() const { return property<bool>("Discovering"); }
 
   QDBusPendingReply<> Adapter::setAlias(const QString &alias)
   {
@@ -60,10 +61,10 @@ namespace DBus::Bluez
       break;
     };
 
-    qDebug() << "Property changed:"
-             << m_path.path()
-             << name
-             << "changed to"
-             << value;
+    // qDebug() << "Property changed:"
+    //          << m_path.path()
+    //          << name
+    //          << "changed to"
+    //          << value;
   }
 }

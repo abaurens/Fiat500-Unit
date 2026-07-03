@@ -17,7 +17,7 @@ namespace DBus::Bluez
     Q_OBJECT
 
   public:
-    const QDBusObjectPath &path() const;
+    const QDBusObjectPath &path() const { return m_path; };
 
   protected:
     explicit Object(const QString &interfaceName,
@@ -36,7 +36,9 @@ namespace DBus::Bluez
     T property(const QString &name) const
     {
       if (!m_properties.contains(name))
+      {
         qWarning() << "Object" << m_interfaceName << " does not have a property " << name;
+      }
       Q_ASSERT(m_properties.contains(name));
       return m_properties.value(name).template value<T>();
     }

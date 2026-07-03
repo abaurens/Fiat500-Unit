@@ -1,5 +1,8 @@
 #pragma once
 
+#include "widgets/AdapterPanel.hpp"
+#include "widgets/DevicePanel.hpp"
+
 #include <QMainWindow>
 
 #include <QLineEdit>
@@ -15,15 +18,10 @@ public:
   ~MainWindow() override;
 
 signals:
-  void nameChanged(const QString &);
-  void discClicked();
 
 private slots:
-  void onEditClick();
-  void onDiscClick();
 
 private:
-  QLineEdit   *edit;
-  QPushButton *btn;
-  QPushButton *disc;
+  AdapterPanel *m_adapterPanel;
+  DevicePanel  *m_devicePanel;
 };
