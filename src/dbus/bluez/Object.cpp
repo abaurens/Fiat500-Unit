@@ -55,21 +55,17 @@ namespace DBus::Bluez
     PropertyMap changed;
     dbusArg >> changed;
 
-    //qDebug() << "interface:    " << interface;
-    //qDebug() << "interfaceName:" << m_interfaceName;
-    //Q_ASSERT(interface == m_interfaceName);
-
     return updateProperties(interface, changed, invalidated);
   }
 
   void Object::subscribeToDBus()
   {
     const bool ok = QDBusConnection::systemBus().connect(
-      Service, m_path.path(), PropertiesInterface, PropertiesChanged,
+      Service, m_path.path(), Interface::Properties, Method::PropertiesChanged,
       this, SLOT(onPropertiesChanged_dbus(QString, QDBusMessage))
     );
 
-    qDebug() << "Subscribed to" << Service << m_path.path() << PropertiesInterface << PropertiesChanged;
+    qDebug() << "Subscribed to" << Service << m_path.path() << Interface::Properties << Method::PropertiesChanged;
 
     Q_ASSERT(ok);
   }
@@ -77,11 +73,11 @@ namespace DBus::Bluez
   void Object::unsubscribeFromDBus()
   {
     const bool ok = QDBusConnection::systemBus().disconnect(
-      Service, m_path.path(), PropertiesInterface, PropertiesChanged,
+      Service, m_path.path(), Interface::Properties, Method::PropertiesChanged,
       this, SLOT(onPropertiesChanged_dbus(QString, QDBusMessage))
     );
 
-    qDebug() << "unsibscribed from" << Service << m_path.path() << PropertiesInterface << PropertiesChanged;
+    qDebug() << "unsibscribed from" << Service << m_path.path() << Interface::Properties << Method::PropertiesChanged;
 
     Q_ASSERT(ok);
   }

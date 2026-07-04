@@ -59,10 +59,8 @@ namespace DBus::Bluez
     QDBusPendingReply<> setProperty(const QString &propertyName, const T &value)
     {
       return callMethod_impl(
-        "Set",
-        PropertiesInterface,
-        m_interfaceName,
-        propertyName,
+        "Set", Interface::Properties,
+        m_interfaceName, propertyName,
         QVariant::fromValue(QDBusVariant(QVariant::fromValue(value)))
       );
     }

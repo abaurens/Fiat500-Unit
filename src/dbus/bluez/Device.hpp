@@ -39,7 +39,7 @@ namespace DBus::Bluez
     };
 
   public:
-    static constexpr Name InterfaceName = "org.bluez.Device1";
+    inline static constexpr Name InterfaceName = "org.bluez.Device1";
 
   public:
     explicit Device(const QDBusObjectPath &path,

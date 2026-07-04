@@ -108,7 +108,6 @@ DevicePanel::DevicePanel(QWidget *parent)
 
   /// Device list
   {
-
     for (Device *device : DBus::Bluez::Manager::devices())
       addDevice(device->path(), *device);
 

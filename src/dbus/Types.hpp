@@ -44,9 +44,21 @@ namespace DBus
     }
   };
 
-  inline constexpr Name PropertiesInterface = "org.freedesktop.DBus.Properties";
-  inline constexpr Name PropertiesChanged   = "PropertiesChanged";
-  inline constexpr Name RootPath            = "/";
+  namespace Method
+  {
+    inline constexpr Name GetManagedObjects = "GetManagedObjects";
+    inline constexpr Name PropertiesChanged = "PropertiesChanged";
+    inline constexpr Name InterfacesRemoved = "InterfacesRemoved";
+    inline constexpr Name InterfacesAdded   = "InterfacesAdded";
+  }
+
+  namespace Interface
+  {
+    inline constexpr Name ObjectManager = "org.freedesktop.DBus.ObjectManager";
+    inline constexpr Name Properties    = "org.freedesktop.DBus.Properties";
+  }
+
+  inline constexpr Name RootPath = "/";
 
   //template<std::unsigned_integral T = unsigned int>
   //struct Property

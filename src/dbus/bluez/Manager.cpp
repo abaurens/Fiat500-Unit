@@ -5,19 +5,108 @@
 
 namespace DBG
 {
-  constexpr bool log_initialize = false;
+  constexpr bool log_initialize = true;
   constexpr bool log_interface_added = false;
   constexpr bool log_interface_removed = false;
-  constexpr bool log_device_added = true;
-  constexpr bool log_device_removed = true;
 
+  constexpr bool log_adapter_added = false;
+  constexpr bool log_adapter_removed = false;
+  constexpr bool log_device_added = false;
+  constexpr bool log_device_removed = false;
 }
 
 #define LOG_DBG(_case, _msg) do { if constexpr (DBG::log_##_case) { qDebug() << _msg; } } while(0)
 
+// Bluez::Object types support
 namespace DBus::Bluez
 {
+  void Manager::addObject(Adapter &adapter)
+  {
+    // We don't want to replace the current adapter.
+    if (m_adapter)
+    {
+      LOG_DBG(interface_added, "Adapter appeared:" << adapter.path());
+      LOG_DBG(interface_added, "  We currently only support 1 adapter...");
+      return;
+    }
 
+    LOG_DBG(adapter_added,
+            "Adapter set:"
+              << adapter.alias()
+              << adapter.address()
+            );
+
+    m_adapter = &adapter;
+  }
+
+  void Manager::removeObject(Adapter &adapter)
+  {
+    const QDBusObjectPath &path = adapter.path();
+
+    if (!m_adapter || path != m_adapter->path())
+      return;
+
+    LOG_DBG(adapter_added, "Adapter removed:" << adapter.path().path());
+
+    delete m_adapter;
+    m_adapter = nullptr;
+  }
+
+  bool Manager::getObject(const QDBusObjectPath &path, Adapter *(&adapter))
+  {
+    if (!m_adapter || path != m_adapter->path())
+      return false;
+
+    adapter = m_adapter;
+    return true;
+  }
+
+
+  void Manager::addObject(Device &device)
+  {
+    m_devices.insert(device.path(), &device);
+
+    LOG_DBG(device_added,
+            "Device added:"
+              << device.alias()
+              << device.address()
+              << device.connected()
+            );
+
+    emit deviceAdded(device.path(), device);
+  }
+
+  void Manager::removeObject(Device &device)
+  {
+    const QDBusObjectPath &path = device.path();
+
+    auto it = m_devices.find(path);
+    if (it == m_devices.end())
+      return;
+
+    LOG_DBG(device_removed, "Device removed:" << path.path());
+
+    emit deviceRemoved(path);
+
+    delete *it;
+    m_devices.erase(it);
+  }
+
+  bool Manager::getObject(const QDBusObjectPath &path, Device *(&device))
+  {
+    auto it = m_devices.find(path);
+
+    if (it == m_devices.end())
+      return false;
+
+    device = *it;
+    return true;
+  }
+}
+
+// Implementation details
+namespace DBus::Bluez
+{
   Manager &Manager::instance()
   {
     static Manager g_manager;
@@ -47,46 +136,16 @@ namespace DBus::Bluez
     {
       const InterfaceMap &interfaces = it.value();
 
-      /// TODO: I should probably build my Bluez::Objects with a
-      /// factory instead of manually discriminating the types.
-      if (interfaces.contains("org.bluez.Adapter1"))
-      {
-        m_adapter = new Adapter(it.key(), interfaces, this);
-
-        LOG_DBG(initialize,
-              "Adapter created:"
-           << m_adapter->alias()
-           << m_adapter->address()
-           << m_adapter->powered()
-        );
-      }
-
-      if (interfaces.contains("org.bluez.Device1"))
-      {
-        //Device *device = new Device(it.key(), interfaces, this);
-        //m_devices.insert(it.key(), device);
-
-        addDevice(it.key(), interfaces);
-
-        //LOG_DBG(initialize,
-        //    "Device found:"
-        //  << device->alias()
-        //  << device->address()
-        //  << device->connected()
-        //);
-      }
+      // Try to create the object with each of the passed types
+      createObjects(it.key(), interfaces);
     }
 
     m_bus.connect(
-      Service, "/",
-      "org.freedesktop.DBus.ObjectManager",
-      "InterfacesAdded",
+      Service, RootPath, Interface::ObjectManager, Method::InterfacesAdded,
       this, SLOT(onInterfacesAdded(QDBusObjectPath, InterfaceMap))
     );
     m_bus.connect(
-      Service, "/",
-      "org.freedesktop.DBus.ObjectManager",
-      "InterfacesRemoved",
+      Service, RootPath, Interface::ObjectManager, Method::InterfacesRemoved,
       this, SLOT(onInterfacesRemoved(QDBusObjectPath, QStringList))
     );
 
@@ -96,9 +155,7 @@ namespace DBus::Bluez
   ManagedObjectMap Manager::loadManagedObjects()
   {
     const QDBusMessage message = QDBusMessage::createMethodCall(
-      "org.bluez", "/",
-      "org.freedesktop.DBus.ObjectManager",
-      "GetManagedObjects"
+      Service, RootPath, Interface::ObjectManager, Method::GetManagedObjects
     );
 
     const QDBusMessage reply = m_bus.call(message);
@@ -122,87 +179,44 @@ namespace DBus::Bluez
   {
     LOG_DBG(interface_added, "Added:" << path.path());
 
-    if (interfaces.contains(Device::InterfaceName))
-    {
-      LOG_DBG(interface_added, "Device connected:" << path.path());
+    //if (interfaces.contains(Device::InterfaceName))
+    //{
+    //  LOG_DBG(interface_added, "Device connected:" << path.path());
+    //
+    //  if constexpr (DBG::log_interface_added)
+    //  {
+    //    if (interfaces.isEmpty())
+    //      LOG_DBG(interface_added, "Interfaces: [ EMPTY ]");
+    //    else
+    //      LOG_DBG(interface_added, "Interfaces:");
+    //    for (auto it = interfaces.cbegin(); it != interfaces.cend(); ++it)
+    //    {
+    //      LOG_DBG(interface_added, "  [" << it.key() << "] = " << it.value());
+    //    }
+    //  }
+    //
+    //  if constexpr (DBG::log_interface_added)
+    //  {
+    //    const PropertyMap &properties = interfaces.value("org.bluez.Device1");
+    //
+    //    if (properties.isEmpty())
+    //      LOG_DBG(interface_added, "Device properties: [ EMPTY ]");
+    //    else
+    //      LOG_DBG(interface_added, "Device properties:");
+    //    for (auto it = properties.cbegin(); it != properties.cend(); ++it)
+    //      LOG_DBG(interface_added, "  [" << it.key() << "] = " << it.value());
+    //  }
+    //
+    //  addDevice(path, interfaces);
+    //}
 
-      if constexpr (DBG::log_interface_added)
-      {
-        if (interfaces.isEmpty())
-          LOG_DBG(interface_added, "Interfaces: [ EMPTY ]");
-        else
-          LOG_DBG(interface_added, "Interfaces:");
-        for (auto it = interfaces.cbegin(); it != interfaces.cend(); ++it)
-        {
-          LOG_DBG(interface_added, "  [" << it.key() << "] = " << it.value());
-        }
-      }
-
-      if constexpr (DBG::log_interface_added)
-      {
-        const PropertyMap &properties = interfaces.value("org.bluez.Device1");
-
-        if (properties.isEmpty())
-          LOG_DBG(interface_added, "Device properties: [ EMPTY ]");
-        else
-          LOG_DBG(interface_added, "Device properties:");
-        for (auto it = properties.cbegin(); it != properties.cend(); ++it)
-          LOG_DBG(interface_added, "  [" << it.key() << "] = " << it.value());
-      }
-
-      addDevice(path, interfaces);
-    }
-
-    if (interfaces.contains(Adapter::InterfaceName))
-    {
-      LOG_DBG(interface_added, "Adapter appeared:" << path.path());
-      LOG_DBG(interface_added, "  We currently only support 1 adapter...");
-    }
+    createObjects(path, interfaces);
   }
 
   void Manager::onInterfacesRemoved(const QDBusObjectPath &path, const QStringList &interfaces)
   {
     LOG_DBG(interface_removed, "Removed:" << path.path());
 
-    if (interfaces.contains(Device::InterfaceName.toQString()))
-      removeDevice(path);
-  }
-
-  Device &Manager::addDevice(const QDBusObjectPath &path, const InterfaceMap &interfaces)
-  {
-    Device *device = new Device(path, interfaces, this);
-
-    m_devices.insert(path, device);
-
-    LOG_DBG(device_added,
-        "Device added:"
-      << device->alias()
-      << device->address()
-      << device->connected()
-    );
-
-    emit deviceAdded(path, *device);
-    return *device;
-  }
-
-  void Manager::removeDevice(const QDBusObjectPath &path)
-  {
-    auto it = m_devices.find(path);
-
-    if (it == m_devices.end())
-      return;
-
-
-    LOG_DBG(device_removed, "Device removed:" << path.path());
-
-    emit deviceRemoved(path);
-
-    delete *it;
-    m_devices.erase(it);
-  }
-
-  void Manager::removeDevice(const Device &device)
-  {
-    return removeDevice(device.path());
+    removeObjects(path, interfaces);
   }
 }
