@@ -55,9 +55,9 @@ namespace DBus::Bluez
       emit blockedChanged(value.toBool());
       break;
 
-    case Property::Player:
-      emit playerChanged(value.value<Object::Path>());
-      break;
+    //case Property::Player:
+    //  emit playerChanged(value.value<Object::Path>());
+    //  break;
 
     case Property::ServicesResolved:
       emit servicesResolvedChanged(value.toBool());
@@ -65,7 +65,7 @@ namespace DBus::Bluez
 
     default:
      #ifndef NDEBUG
-      qDebug() << m_path.path() << ": Unhandled property " << name << "changed to" << value;
+      // qDebug() << m_path.path() << ": Unhandled property " << name << "changed to" << value;
      #endif
       break;
     }

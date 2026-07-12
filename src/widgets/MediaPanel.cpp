@@ -88,7 +88,8 @@ void MediaPanel::setMediaPlayer(MediaPlayer *player)
 
   if (m_mediaPlayer != nullptr)
   {
-    disconnect(m_mediaPlayer, nullptr, nullptr, nullptr);
+    disconnect(m_mediaPlayer, &MediaPlayer::trackChanged, nullptr, nullptr);
+    disconnect(m_mediaPlayer, &MediaPlayer::positionChanged, nullptr, nullptr);
 
     disconnect(m_play,          nullptr, nullptr, nullptr);
     disconnect(m_pause,         nullptr, nullptr, nullptr);
@@ -124,7 +125,7 @@ void MediaPanel::setMediaPlayer(MediaPlayer *player)
   connect(
     player, &MediaPlayer::positionChanged,
     [this](uint32_t pos) {
-      pos %= m_timeline->maximum();
+      pos %= (m_timeline->maximum() + 5);
 
       uint32_t sec = pos / 1000;
 
@@ -177,5 +178,6 @@ void MediaPanel::setTrackInfo(const DBus::Bluez::TrackInfo &track)
   m_title->setText(tr(title_str).arg(track.title));
 
   m_timeline->setValue(0);
-  m_timeline->setMaximum(static_cast<int>(track.duration));
+  m_timeline->setTextVisible(track.duration > 0);
+  m_timeline->setMaximum(std::max(static_cast<int>(track.duration), 1));
 }

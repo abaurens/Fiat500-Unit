@@ -10,14 +10,28 @@ void registerDBusTypes()
 
 QDBusArgument &operator<<(QDBusArgument &argument, const InterfaceMap &map)
 {
-  argument.beginMap();
+  qDebug() << "beginMap";
+  argument.beginMap(
+    QMetaType::fromType<QString>(),
+    QMetaType::fromType<PropertyMap>()
+  );
+
   for (auto it = map.cbegin(); it != map.cend(); ++it)
   {
+     qDebug() << "entry";
     argument.beginMapEntry();
+
+    qDebug() << "key";
     argument << it.key();
+
+    qDebug() << "value";
     argument << it.value();
+
+    qDebug() << "end entry";
     argument.endMapEntry();
   }
+
+  qDebug() << "endMap";
   argument.endMap();
 
   return argument;
@@ -27,7 +41,10 @@ QDBusArgument &operator>>(QDBusArgument &argument, InterfaceMap &map)
 {
   map.clear();
 
-  argument.beginMap();
+  argument.beginMap(
+    QMetaType::fromType<QString>(),
+    QMetaType::fromType<PropertyMap>()
+  );
 
   QString key;
   PropertyMap value;
@@ -48,7 +65,11 @@ QDBusArgument &operator>>(QDBusArgument &argument, InterfaceMap &map)
 
 QDBusArgument &operator<<(QDBusArgument &argument, const ManagedObjectMap &map)
 {
-  argument.beginMap();
+  argument.beginMap(
+    QMetaType::fromType<QDBusObjectPath>(),
+    QMetaType::fromType<InterfaceMap>()
+  );
+
   for (auto it = map.cbegin(); it != map.cend(); ++it)
   {
     argument.beginMapEntry();
@@ -65,7 +86,10 @@ QDBusArgument &operator>>(QDBusArgument &argument, ManagedObjectMap &map)
 {
   map.clear();
 
-  argument.beginMap();
+  argument.beginMap(
+    QMetaType::fromType<QDBusObjectPath>(),
+    QMetaType::fromType<InterfaceMap>()
+  );
 
   QDBusObjectPath key;
   InterfaceMap value;

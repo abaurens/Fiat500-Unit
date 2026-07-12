@@ -124,7 +124,7 @@ namespace DBus
     virtual void onPropertyChanged(const QString &name, const QVariant &value)
     {
      #ifndef NDEBUG
-      qDebug() << m_path.path() << ": Unhandled property " << name << "changed to" << value;
+      // qDebug() << m_path.path() << ": Unhandled property " << name << "changed to" << value;
      #endif
     }
 
@@ -151,6 +151,8 @@ namespace DBus
       QDBusPendingReply<> reply = callMethod_impl(method, interface, std::forward<Args>(args)...);
 
       QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(reply, this);
+
+      watcher->setProperty("method", method);
 
       connect(
         watcher, &QDBusPendingCallWatcher::finished,

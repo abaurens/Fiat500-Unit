@@ -22,7 +22,7 @@ namespace DBus::Bluez
       Paired,
       Trusted,
       Blocked,
-      Player,
+      // Player,
       ServicesResolved,
 
       Unknown = -1
@@ -35,7 +35,7 @@ namespace DBus::Bluez
       DECL_DBUS_PROPERTY(Paired),
       DECL_DBUS_PROPERTY(Trusted),
       DECL_DBUS_PROPERTY(Blocked),
-      DECL_DBUS_PROPERTY(Player),
+      // DECL_DBUS_PROPERTY(Player),
       DECL_DBUS_PROPERTY(ServicesResolved)
     };
 
@@ -69,7 +69,7 @@ namespace DBus::Bluez
     void pairedChanged(bool paired);
     void trustedChanged(bool trusted);
     void blockedChanged(bool blocked);
-    void playerChanged(const DBus::Object::Path &path);
+    // void playerChanged(const DBus::Object::Path &path);
     void servicesResolvedChanged(bool resolved);
 
   private:

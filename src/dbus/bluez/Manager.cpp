@@ -173,7 +173,7 @@ namespace DBus::Bluez
 
     emit mediaPlayerRemoved(path);
 
-    delete *it;
+    it.value()->deleteLater();
     m_mediaPlayers.erase(it);
   }
 
@@ -223,6 +223,17 @@ namespace DBus::Bluez
 
       // Try to create the object with each of the passed types
       createObjects(it.key(), interfaces);
+    }
+
+    // DEBUG InterfaceMap operator
+    {
+      QDBusArgument arg;
+
+      InterfaceMap map;
+
+      arg << map;
+
+      qDebug() << "ok";
     }
 
     m_bus.connect(

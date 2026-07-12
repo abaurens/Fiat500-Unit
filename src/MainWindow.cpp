@@ -1,42 +1,55 @@
-#include "dbus/bluez/Manager.hpp"
+// #include "dbus/bluez/Manager.hpp"
 
 #include "MainWindow.hpp"
 
+#include <QSize>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QSpacerItem>
+
+static constexpr QSize buttonSize { 100, 120 };
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-  QWidget *centralWidget = new QWidget(this);
+  QVBoxLayout *buttonLayout = new QVBoxLayout();
+  m_musicPageButton = new QPushButton(tr("Music"));
+  m_settingsPageButton = new QPushButton(tr("Settings"));
 
-  QVBoxLayout *mainLayout = new QVBoxLayout();
-  QHBoxLayout *topLayout = new QHBoxLayout();
+  m_musicPageButton->setMinimumSize(buttonSize);
+  m_settingsPageButton->setMinimumSize(buttonSize);
 
-  setCentralWidget(centralWidget);
-  centralWidget->setLayout(mainLayout);
+  buttonLayout->addWidget(m_musicPageButton);
+  buttonLayout->addWidget(m_settingsPageButton);
+  buttonLayout->addStretch();
 
-  m_adapterPanel = new AdapterPanel(*DBus::Bluez::Manager::adapter(), this);
-  m_devicePanel = new DevicePanel(this);
-  m_mediaPanel = new MediaPanel(this);
+  m_musicPage = new MusicPage();
+  m_settingsPage = new SettingsPage();
 
-  topLayout->addWidget(m_adapterPanel);
-  topLayout->addWidget(m_mediaPanel);
-
-  mainLayout->addLayout(topLayout);
-  mainLayout->addWidget(m_devicePanel);
-
-  using DBus::Bluez::Manager;
-  using DBus::Bluez::MediaControl;
-
-  m_mediaPanel->setMediaControler(Manager::getObject<MediaControl>(m_devicePanel->selectedDevice()));
+  m_stackedWidget = new QStackedWidget();
+  m_stackedWidget->addWidget(m_musicPage);
+  m_stackedWidget->addWidget(m_settingsPage);
 
   connect(
-    m_devicePanel, &DevicePanel::deviceSelected,
-    [this](DBus::Bluez::Device *device)
-    {
-      m_mediaPanel->setMediaControler(Manager::getObject<MediaControl>(device));
+    m_musicPageButton, &QPushButton::clicked,
+    [this]() {
+      m_stackedWidget->setCurrentIndex(0);
     }
   );
+
+  connect(
+    m_settingsPageButton, &QPushButton::clicked,
+    [this]() {
+      m_stackedWidget->setCurrentIndex(1);
+    }
+  );
+
+  QHBoxLayout *mainLayout = new QHBoxLayout();
+  mainLayout->addLayout(buttonLayout);
+  mainLayout->addWidget(m_stackedWidget);
+
+  QWidget *centralWidget = new QWidget(this);
+  centralWidget->setLayout(mainLayout);
+  setCentralWidget(centralWidget);
 }
 
 MainWindow::~MainWindow() = default;

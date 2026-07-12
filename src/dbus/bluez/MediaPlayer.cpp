@@ -170,7 +170,7 @@ namespace DBus::Bluez
 
     default:
 #ifndef NDEBUG
-      qDebug() << m_path.path() << ": Unhandled property " << name << "changed to" << value;
+      // qDebug() << m_path.path() << ": Unhandled property " << name << "changed to" << value;
 #endif
       break;
     }

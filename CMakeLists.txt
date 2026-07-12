@@ -42,9 +42,13 @@ qt_add_executable(Fiat500-Unit
     src/dbus/bluez/Manager.hpp src/dbus/bluez/Manager.cpp src/dbus/bluez/Manager.tpp
 
     src/widgets/sizes.hpp
+    src/widgets/DebugPanel.hpp src/widgets/DebugPanel.cpp
     src/widgets/DevicePanel.hpp src/widgets/DevicePanel.cpp
     src/widgets/AdapterPanel.hpp src/widgets/AdapterPanel.cpp
     src/widgets/MediaPanel.hpp src/widgets/MediaPanel.cpp
+
+    src/pages/MusicPage.hpp src/pages/MusicPage.cpp
+    src/pages/SettingsPage.hpp src/pages/SettingsPage.cpp
 )
 
 qt_add_translations(

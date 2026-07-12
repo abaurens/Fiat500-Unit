@@ -21,7 +21,7 @@ void registerDBusTypes();
 QDBusArgument &operator<<(QDBusArgument &argument, const InterfaceMap &map);
 QDBusArgument &operator>>(QDBusArgument &argument, InterfaceMap &map);
 
-QDBusArgument &operator<<(QDBusArgument &argument, const InterfaceMap &map);
+QDBusArgument &operator<<(QDBusArgument &argument, const ManagedObjectMap &map);
 QDBusArgument &operator>>(QDBusArgument &argument, ManagedObjectMap &map);
 
 #define DECL_DBUS_PROPERTY(__property) { #__property, Property::__property }

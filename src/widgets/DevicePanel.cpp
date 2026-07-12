@@ -118,6 +118,22 @@ DevicePanel::DevicePanel(QWidget *parent)
     );
 
     connect(
+      m_deviceList, &QListWidget::itemSelectionChanged,
+      [this]()
+      {
+        QList<QListWidgetItem*> selectedItems = m_deviceList->selectedItems();
+
+        if (selectedItems.isEmpty())
+          return onSelectDevice(nullptr);
+
+        QListWidgetItem *selected = selectedItems.front();
+        DBus::Object::Path path = selected->data(Qt::UserRole).value<DBus::Object::Path>();
+
+        onSelectDevice(DBus::Bluez::Manager::getObject<DBus::Bluez::Device>(path));
+      }
+    );
+
+    connect(
       m_deviceList, &QListWidget::currentItemChanged,
       [this](QListWidgetItem *item, QListWidgetItem *)
       {

@@ -14,7 +14,6 @@ namespace DBus
     : Object{ interfaceName, path, interfaces.value(interfaceName), parent }
   {}
 
-
   Object::~Object()
   {
     unsubscribeFromDBus();

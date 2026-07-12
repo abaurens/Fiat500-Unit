@@ -34,8 +34,6 @@ namespace DBus::Bluez
 
     explicit MediaControl(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent = nullptr);
 
-    // MediaPlayer *playerObject() const;
-
     bool connected() const;
     Object::Path player() const;
 
@@ -50,6 +48,8 @@ namespace DBus::Bluez
     void playerChanged(DBus::Bluez::MediaPlayer *player);
 
   private:
+    void onPlayerChange(const Object::Path &playerPath);
+    void onPlayerRemoved(const Object::Path &path);
     explicit MediaControl(const Object::Path &path, const PropertyMap &properties, QObject *parent = nullptr);
 
     virtual void onPropertyChanged(const QString &name, const QVariant &value) override;
