@@ -18,13 +18,17 @@ class DevicePanel : public QGroupBox
 public:
   explicit DevicePanel(QWidget *parent = nullptr);
 
+  Device *selectedDevice() const { return m_selectedDevice; }
+
 signals:
+  void deviceSelected(DBus::Bluez::Device *device);
 
 private slots:
-  void addDevice(const QDBusObjectPath &path, DBus::Bluez::Device &device);
-  void removeDevice(const QDBusObjectPath &path);
+  void addDevice(const DBus::Object::Path &path, DBus::Bluez::Device &device);
+  void removeDevice(const DBus::Object::Path &path);
 
   void selectDevice(DBus::Bluez::Device *device);
+  void onSelectDevice(DBus::Bluez::Device *device);
 
   void selectedDeviceAliasChanged(const QString &alias);
   // void selectedDeviceRSSIChanged(const QString &alias);
@@ -33,7 +37,6 @@ private slots:
   void selectedDeviceConnectedChanged(bool connected);
   void selectedDeviceServicesResolvedChanged(bool servicesResolved);
 
-
 private:
   void connectDevice(Device *device);
   void disconnectDevice(const Device *const device);
@@ -41,7 +44,7 @@ private:
 private:
   Device *m_selectedDevice = nullptr;
 
-  QHash<QDBusObjectPath, QListWidgetItem *> m_items;
+  QHash<DBus::Object::Path, QListWidgetItem *> m_items;
 
 private:
   QListWidget *m_deviceList;

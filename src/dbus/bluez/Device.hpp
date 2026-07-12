@@ -1,15 +1,14 @@
 #pragma once
 
 #include "dbus/Types.hpp"
-#include "dbus/bluez/Object.hpp"
+#include "dbus/Object.hpp"
 
 #include <QObject>
-#include <QDBusObjectPath>
 
 namespace DBus::Bluez
 {
   class Device;
-  using DeviceMap = QMap<QDBusObjectPath, Device *>;
+  using DeviceMap = QMap<Object::Path, Device *>;
 
   class Device : public Object
   {
@@ -44,13 +43,7 @@ namespace DBus::Bluez
     inline static constexpr Name InterfaceName = "org.bluez.Device1";
 
   public:
-    explicit Device(const QDBusObjectPath &path,
-                    const InterfaceMap &interfaces,
-                    QObject *parent = nullptr);
-
-    explicit Device(const QDBusObjectPath &path,
-                    const PropertyMap &properties,
-                    QObject *parent = nullptr);
+    explicit Device(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent = nullptr);
 
     /// Is the device paired (may have to ask permission again to connect if not trusted)
     bool paired() const;
@@ -62,13 +55,13 @@ namespace DBus::Bluez
     QString alias() const;
     QString address() const;
 
-    QDBusPendingReply<> setTrusted(bool trusted);
+    void setTrusted(bool trusted);
 
-    QDBusPendingReply<> pair();
-    QDBusPendingReply<> trust();
-    QDBusPendingReply<> untrust();
-    QDBusPendingReply<> connect();
-    QDBusPendingReply<> disconnect();
+    void pair();
+    void trust();
+    void untrust();
+    void connect();
+    void disconnect();
 
   signals:
     void aliasChanged(const QString &alias);
@@ -76,10 +69,12 @@ namespace DBus::Bluez
     void pairedChanged(bool paired);
     void trustedChanged(bool trusted);
     void blockedChanged(bool blocked);
-    void playerChanged(const QDBusObjectPath &path);
+    void playerChanged(const DBus::Object::Path &path);
     void servicesResolvedChanged(bool resolved);
 
   private:
+    explicit Device(const Object::Path &path, const PropertyMap &properties, QObject *parent = nullptr);
+
     virtual void onPropertyChanged(const QString &name, const QVariant &newValue) override final;
   };
 }

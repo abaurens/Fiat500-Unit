@@ -7,10 +7,11 @@
 #include <QDBusConnection>
 #include <QDBusObjectPath>
 #include <QDBusPendingReply>
+#include <QDBusPendingCallWatcher>
 
 #include <optional>
 
-namespace DBus::Bluez
+namespace DBus
 {
   inline constexpr Name Service = "org.bluez";
 
@@ -19,18 +20,13 @@ namespace DBus::Bluez
     Q_OBJECT
 
   public:
-    const QDBusObjectPath &path() const { return m_path; };
+    using Path = QDBusObjectPath;
+
+    const Path &path() const { return m_path; };
 
   protected:
-    explicit Object(const QString &interfaceName,
-                    const QDBusObjectPath &path,
-                    const InterfaceMap &interfaces,
-                    QObject *parent = nullptr);
-
-    explicit Object(const QString &interfaceName,
-                    const QDBusObjectPath &path,
-                    const PropertyMap &properties,
-                    QObject *parent = nullptr);
+    explicit Object(const QString &interfaceName, const Path &path, const InterfaceMap &interfaces, QObject *parent = nullptr);
+    explicit Object(const QString &interfaceName, const Path &path, const PropertyMap &properties, QObject *parent = nullptr);
 
     virtual ~Object();
 
@@ -77,9 +73,9 @@ namespace DBus::Bluez
 
     /// Uses callMethod_impl to call methods on the current interface.
     template<typename... Args>
-    QDBusPendingReply<> callMethod(const QString &method, Args &&... args)
+    void callMethod(const QString &method, Args &&... args)
     {
-      return callMethod_impl(
+      return callMethod_protected(
         method,
         m_interfaceName,
         std::forward<Args>(args)...
@@ -88,9 +84,9 @@ namespace DBus::Bluez
 
     /// Uses callMethod_impl to call the Set method on the "org.freedesktop.DBus.Properties" interface.
     template<typename T>
-    QDBusPendingReply<> setProperty(const QString &propertyName, const T &value)
+    void setProperty(const QString &propertyName, const T &value)
     {
-      return callMethod_impl(
+      return callMethod_protected(
         "Set", Interface::Properties,
         m_interfaceName, propertyName,
         QVariant::fromValue(QDBusVariant(QVariant::fromValue(value)))
@@ -133,11 +129,13 @@ namespace DBus::Bluez
     }
 
   signals:
-    void propertyChanged(const QStringView name, const QVariant &value);
     void propertiesChanged();
+    void propertyChanged(const QStringView name, const QVariant &value);
+    void methodCallFailed(const QString &method, const QString &errorName, const QString &message);
 
   private slots:
     void onPropertiesChanged_dbus(const QString &interface, const QDBusMessage &changed);
+    void onMethodCallFinished(QDBusPendingCallWatcher *watcher);
 
   private:
     static QVariant normalizeVariant(const QVariant &value);
@@ -146,6 +144,19 @@ namespace DBus::Bluez
     void unsubscribeFromDBus();
     void updateProperty(const QString &propertyName, const QVariant &newValue);
     void updateProperties(const QString &interface, const QVariantMap &changed, const QStringList &invalidated);
+
+    template<typename... Args>
+    void callMethod_protected(const QString &method, const QString &interface, Args &&... args)
+    {
+      QDBusPendingReply<> reply = callMethod_impl(method, interface, std::forward<Args>(args)...);
+
+      QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(reply, this);
+
+      connect(
+        watcher, &QDBusPendingCallWatcher::finished,
+        this,    &Object::onMethodCallFinished
+      );
+    }
 
     /// Generic helper that calls a method on arbitrary D-Bus interface.
     template<typename... Args>
@@ -165,8 +176,8 @@ namespace DBus::Bluez
     }
 
   protected:
-    QString         m_interfaceName;
-    QDBusObjectPath m_path;
-    PropertyMap     m_properties;
+    QString     m_interfaceName;
+    Path        m_path;
+    PropertyMap m_properties;
   };
 }

@@ -3,40 +3,43 @@
 
 namespace DBus::Bluez
 {
-  MediaControl::MediaControl(const QDBusObjectPath &path, const InterfaceMap &interfaces, QObject *parent)
-    : Object{ InterfaceName, path, interfaces, parent }
-  { }
-
-  MediaControl::MediaControl(const QDBusObjectPath &path, const PropertyMap &properties, QObject *parent)
+  MediaControl::MediaControl(const Object::Path &path, const PropertyMap &properties, QObject *parent)
     : Object{ InterfaceName, path, properties, parent }
-  { }
+  {
+
+    qDebug() << "Media Control created with initial player:" << player().path();
+  }
+
+  MediaControl::MediaControl(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent)
+    : MediaControl{ path, interfaces.value(InterfaceName), parent }
+  {}
 
   bool MediaControl::connected() const
   {
     return property<bool>("Connected");
   }
 
-  QDBusObjectPath MediaControl::player() const
+  Object::Path MediaControl::player() const
   {
-    return propertyOr<QDBusObjectPath>("Player", {});
+    return propertyOr<Object::Path>("Player", {});
   }
 
-  QDBusPendingReply<> MediaControl::play()
+  void MediaControl::play()
   {
     return callMethod("Play");
   }
 
-  QDBusPendingReply<> MediaControl::pause()
+  void MediaControl::pause()
   {
     return callMethod("Pause");
   }
 
-  QDBusPendingReply<> MediaControl::next()
+  void MediaControl::next()
   {
     return callMethod("Next");
   }
 
-  QDBusPendingReply<> MediaControl::previous()
+  void MediaControl::previous()
   {
     return callMethod("Previous");
   }
@@ -56,7 +59,8 @@ namespace DBus::Bluez
 
     case Property::Player:
       {
-        const QDBusObjectPath playerPath = value.value<QDBusObjectPath>();
+        const Object::Path playerPath = value.value<Object::Path>();
+        qDebug() << "MediaControl.player changed to" << playerPath;
         MediaPlayer *const player = Manager::mediaPlayers().value(playerPath, nullptr);
         emit playerChanged(player);
         break;

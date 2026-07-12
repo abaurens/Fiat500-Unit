@@ -6,7 +6,7 @@ static constexpr uint32_t positionUpdateDelay = 1000 / positionUpdateFrequency;
 
 namespace DBus::Bluez
 {
-  MediaPlayer::MediaPlayer(const QDBusObjectPath &path, const PropertyMap &properties, QObject *parent)
+  MediaPlayer::MediaPlayer(const Object::Path &path, const PropertyMap &properties, QObject *parent)
   : Object{ InterfaceName, path, properties, parent }, m_timer(new QTimer(this))
   {
     m_timer->setInterval(positionUpdateDelay);
@@ -21,7 +21,7 @@ namespace DBus::Bluez
     onStatusChanged(status());
   }
 
-  MediaPlayer::MediaPlayer(const QDBusObjectPath &path, const InterfaceMap &interfaces, QObject *parent)
+  MediaPlayer::MediaPlayer(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent)
     : MediaPlayer{ path, interfaces.value(InterfaceName), parent }
   {}
 
@@ -55,38 +55,38 @@ namespace DBus::Bluez
     return TrackInfo{ propertyOr<PropertyMap>("Track", {}) };
   }
 
-  QDBusObjectPath MediaPlayer::device() const
+  Object::Path MediaPlayer::device() const
   {
-    return property<QDBusObjectPath>("Device");
+    return property<Object::Path>("Device");
   }
 
 
-  QDBusPendingReply<> MediaPlayer::setRepeat(bool repeat)
+  void MediaPlayer::setRepeat(bool repeat)
   {
     return setProperty<bool>("Repeat", repeat);
   }
 
-  QDBusPendingReply<> MediaPlayer::setShuffle(bool shuffle)
+  void MediaPlayer::setShuffle(bool shuffle)
   {
     return setProperty<bool>("Shuffle", shuffle);
   }
 
-  QDBusPendingReply<> MediaPlayer::play()
+  void MediaPlayer::play()
   {
     return callMethod("Play");
   }
 
-  QDBusPendingReply<> MediaPlayer::pause()
+  void MediaPlayer::pause()
   {
     return callMethod("Pause");
   }
 
-  QDBusPendingReply<> MediaPlayer::next()
+  void MediaPlayer::next()
   {
     return callMethod("Next");
   }
 
-  QDBusPendingReply<> MediaPlayer::previous()
+  void MediaPlayer::previous()
   {
     return callMethod("Previous");
   }
@@ -98,6 +98,8 @@ namespace DBus::Bluez
 
   void MediaPlayer::onStatusChanged(const Status status)
   {
+
+
     if (status == Status::Stopped || status == Status::Paused)
       m_timer->stop();
     else
@@ -126,6 +128,8 @@ namespace DBus::Bluez
       break;
 
     case Status::Error:
+      break;
+
     default:
       Q_ASSERT(false); /// Unsupported at the moment. Should probably display an error
     }
@@ -144,6 +148,7 @@ namespace DBus::Bluez
       break;
 
     case Property::Status:
+
       onStatusChanged(Status::fromString(value.toString()));
       break;
 

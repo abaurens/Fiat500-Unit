@@ -83,7 +83,6 @@ DevicePanel::DevicePanel(QWidget *parent)
   fnt.setPointSize(UI::Size::font);
   setFont(fnt);
 
-
   mainLayout->setSpacing(UI::Size::margin);
   mainLayout->setContentsMargins(UI::Size::margins);
 
@@ -108,9 +107,6 @@ DevicePanel::DevicePanel(QWidget *parent)
 
   /// Device list
   {
-    for (Device *device : DBus::Bluez::Manager::devices())
-      addDevice(device->path(), *device);
-
     connect(
       &DBus::Bluez::Manager::instance(), &DBus::Bluez::Manager::deviceAdded,
       this,                              &DevicePanel::addDevice
@@ -122,24 +118,24 @@ DevicePanel::DevicePanel(QWidget *parent)
     );
 
     connect(
-      m_deviceList, &QListWidget::itemSelectionChanged,
-      [this]()
+      m_deviceList, &QListWidget::currentItemChanged,
+      [this](QListWidgetItem *item, QListWidgetItem *)
       {
-        const QList<QListWidgetItem *> &items = m_deviceList->selectedItems();
+        if (!item)
+          return onSelectDevice(nullptr);
 
-        if (items.isEmpty())
-          return selectDevice(nullptr);
+        DBus::Object::Path path = item->data(Qt::UserRole).value<DBus::Object::Path>();
 
-        QListWidgetItem *item = items.front();
-        QDBusObjectPath path = item->data(Qt::UserRole).value<QDBusObjectPath>();
-
-        selectDevice(DBus::Bluez::Manager::devices().value(path));
+        onSelectDevice(DBus::Bluez::Manager::getObject<DBus::Bluez::Device>(path));
       }
     );
   }
+
+  for (Device *device : DBus::Bluez::Manager::devices())
+    addDevice(device->path(), *device);
 }
 
-void DevicePanel::addDevice(const QDBusObjectPath &path, Device &device)
+void DevicePanel::addDevice(const DBus::Object::Path &path, Device &device)
 {
   QListWidgetItem *item = new QListWidgetItem(device.alias());
 
@@ -147,17 +143,44 @@ void DevicePanel::addDevice(const QDBusObjectPath &path, Device &device)
 
   m_items[path] = item;
   m_deviceList->addItem(item);
+
+  if (m_selectedDevice == nullptr)
+    selectDevice(&device);
 }
 
-void DevicePanel::removeDevice(const QDBusObjectPath &path)
+void DevicePanel::removeDevice(const DBus::Object::Path &path)
 {
   QListWidgetItem *item = m_items.take(path);
+
+  if (item->isSelected())
+    selectDevice(nullptr);
 
   if (item)
     delete item;
 }
 
 void DevicePanel::selectDevice(Device *device)
+{
+  QListWidgetItem *item = nullptr;
+
+  if (device)
+    item = m_items.value(device->path(), nullptr);
+
+  if (item)
+  {
+    m_deviceList->setCurrentItem(item);
+    return;
+  }
+
+  // No corresponding item found or device is nullptr.
+  // Automatically select the first available device if any.
+  if (m_deviceList->count())
+  {
+    m_deviceList->setCurrentRow(0);
+  }
+}
+
+void DevicePanel::onSelectDevice(Device *device)
 {
   if (device == m_selectedDevice)
     return;
@@ -182,22 +205,15 @@ void DevicePanel::selectDevice(Device *device)
   m_deviceConnected->setChecked(connected);
   m_deviceServicesResolved->setChecked(serviceResolved);
 
-
   // disconnect previously selected device
   disconnectDevice(m_selectedDevice);
 
-  if (!device)
-  {
-    m_selectedDevice = nullptr;
-
-    // qDebug() << "Selection changed to NULL";
-    return;
-  }
-
   m_selectedDevice = device;
-  connectDevice(device);
 
-  // qDebug() << "Selection changed to" << device->alias();
+  if (device)
+    connectDevice(device);
+
+  emit deviceSelected(device);
 }
 
 void DevicePanel::selectedDeviceAliasChanged(const QString &alias)

@@ -4,6 +4,8 @@
 
 namespace DBus::Bluez
 {
+  static constexpr int __unused__ = 42;
+
   template<class ... ObjTypes>
   size_t Manager::tryCreateAll(const QDBusObjectPath &path, const InterfaceMap &interfaces)
   {
@@ -24,7 +26,7 @@ namespace DBus::Bluez
     if (!interfaces.contains(ObjType::InterfaceName))
       return 0;
 
-    qDebug() << "Trying to creating Object" << path.path() << "of type" << ObjType::InterfaceName;
+    // qDebug() << "Trying to create Object" << path.path() << "of type" << ObjType::InterfaceName;
 
     ObjType *obj = new ObjType(path, interfaces, this);
 
@@ -39,7 +41,7 @@ namespace DBus::Bluez
     if (!interfaces.contains(ObjType::InterfaceName.toQString()))
       return 0;
 
-    qDebug() << "Trying to remove Object" << path.path() << "of type" << ObjType::InterfaceName;
+    // qDebug() << "Trying to remove Object" << path.path() << "of type" << ObjType::InterfaceName;
 
     ObjType *obj = nullptr;
     if (getObject(path, obj))

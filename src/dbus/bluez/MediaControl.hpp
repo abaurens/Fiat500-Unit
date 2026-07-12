@@ -1,17 +1,16 @@
 #pragma once
 
 #include "dbus/Types.hpp"
-#include "dbus/bluez/Object.hpp"
+#include "dbus/Object.hpp"
 
 #include <QObject>
-#include <QDBusObjectPath>
 
 namespace DBus::Bluez
 {
   class MediaPlayer;
 
   class MediaControl;
-  using MediaControlMap = QMap<QDBusObjectPath, MediaControl *>;
+  using MediaControlMap = QMap<Object::Path, MediaControl *>;
 
   class MediaControl : public Object
   {
@@ -33,31 +32,26 @@ namespace DBus::Bluez
   public:
     static constexpr Name InterfaceName = "org.bluez.MediaControl1";
 
-  public:
-    explicit MediaControl(const QDBusObjectPath &path,
-                         const InterfaceMap &interfaces,
-                         QObject *parent = nullptr);
-
-    explicit MediaControl(const QDBusObjectPath &path,
-                         const PropertyMap &properties,
-                         QObject *parent = nullptr);
+    explicit MediaControl(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent = nullptr);
 
     // MediaPlayer *playerObject() const;
 
     bool connected() const;
-    QDBusObjectPath player() const;
+    Object::Path player() const;
 
   public slots:
-    QDBusPendingReply<> play();
-    QDBusPendingReply<> pause();
-    QDBusPendingReply<> next();
-    QDBusPendingReply<> previous();
+    void play();
+    void pause();
+    void next();
+    void previous();
 
   signals:
     void connectedChanged(bool connected);
     void playerChanged(DBus::Bluez::MediaPlayer *player);
 
   private:
+    explicit MediaControl(const Object::Path &path, const PropertyMap &properties, QObject *parent = nullptr);
+
     virtual void onPropertyChanged(const QString &name, const QVariant &value) override;
   };
 }

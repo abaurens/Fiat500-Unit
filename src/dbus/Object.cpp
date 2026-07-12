@@ -1,16 +1,16 @@
-#include "dbus/bluez/Object.hpp"
+#include "dbus/Object.hpp"
 
 #include <QDBusConnection>
 
-namespace DBus::Bluez
+namespace DBus
 {
-  Object::Object(const QString &interfaceName, const QDBusObjectPath &path, const PropertyMap &properties, QObject *parent)
+  Object::Object(const QString &interfaceName, const Object::Path &path, const PropertyMap &properties, QObject *parent)
     : QObject{ parent }, m_interfaceName{ interfaceName }, m_path{ path }, m_properties{ properties }
   {
     subscribeToDBus();
   }
 
-  Object::Object(const QString &interfaceName, const QDBusObjectPath &path, const InterfaceMap &interfaces, QObject *parent)
+  Object::Object(const QString &interfaceName, const Object::Path &path, const InterfaceMap &interfaces, QObject *parent)
     : Object{ interfaceName, path, interfaces.value(interfaceName), parent }
   {}
 
@@ -71,6 +71,24 @@ namespace DBus::Bluez
     dbusArg >> changed;
 
     return updateProperties(interface, changed, invalidated);
+  }
+
+  void Object::onMethodCallFinished(QDBusPendingCallWatcher *watcher)
+  {
+    QDBusPendingReply<> reply = *watcher;
+
+    if (reply.isError())
+    {
+      const QString method = watcher->property("method").toString();
+      const QString name = reply.error().name();
+      const QString message = reply.error().message();
+
+      qWarning() << m_interfaceName << method << name << message;
+
+      emit methodCallFailed(method, name, message);
+    }
+
+    watcher->deleteLater();
   }
 
   void Object::subscribeToDBus()

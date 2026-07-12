@@ -38,9 +38,19 @@ namespace DBus
       return QString(data());
     }
 
+    QDBusObjectPath toPath() const
+    {
+      return QDBusObjectPath(data());
+    }
+
     operator QString() const
     {
       return toQString();
+    }
+
+    operator QDBusObjectPath() const
+    {
+      return toPath();
     }
   };
 
@@ -59,22 +69,4 @@ namespace DBus
   }
 
   inline constexpr Name RootPath = "/";
-
-  //template<std::unsigned_integral T = unsigned int>
-  //struct Property
-  //{
-  //  constexpr Property(Name name, T value)
-  //    : m_name(name), m_value(value)
-  //  {}
-  //
-  //  T value() const { return m_value; }
-  //  Name name() const { return m_name; }
-  //
-  //  operator T() const { return value(); }
-  //  operator Name() const { return name(); }
-  //
-  //private:
-  //  Name m_name;
-  //  T    m_value;
-  //};
 }

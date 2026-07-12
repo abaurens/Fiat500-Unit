@@ -3,11 +3,11 @@
 #include <QDBusConnection>
 namespace DBus::Bluez
 {
-  Device::Device(const QDBusObjectPath &path, const InterfaceMap &interfaces, QObject *parent)
+  Device::Device(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent)
     : Object{ InterfaceName, path, interfaces, parent }
   {}
 
-  Device::Device(const QDBusObjectPath &path, const PropertyMap &properties, QObject *parent)
+  Device::Device(const Object::Path &path, const PropertyMap &properties, QObject *parent)
     : Object{ InterfaceName, path, properties, parent }
   {}
 
@@ -20,13 +20,13 @@ namespace DBus::Bluez
   QString Device::alias() const { return property<QString>("Alias"); }
   QString Device::address() const { return property<QString>("Address"); }
 
-  QDBusPendingReply<> Device::pair() { return callMethod("Pair"); }
-  QDBusPendingReply<> Device::trust() { return setTrusted(true); }
-  QDBusPendingReply<> Device::untrust() { return setTrusted(false); }
-  QDBusPendingReply<> Device::connect() { return callMethod("Connect"); }
-  QDBusPendingReply<> Device::disconnect() { return callMethod("Disconnect"); }
+  void Device::pair() { return callMethod("Pair"); }
+  void Device::trust() { return setTrusted(true); }
+  void Device::untrust() { return setTrusted(false); }
+  void Device::connect() { return callMethod("Connect"); }
+  void Device::disconnect() { return callMethod("Disconnect"); }
 
-  QDBusPendingReply<> Device::setTrusted(bool trusted) { return setProperty("Trusted", trusted); }
+  void Device::setTrusted(bool trusted) { return setProperty("Trusted", trusted); }
 
 
   void Device::onPropertyChanged(const QString &name, const QVariant &value)
@@ -56,7 +56,7 @@ namespace DBus::Bluez
       break;
 
     case Property::Player:
-      emit playerChanged(value.value<QDBusObjectPath>());
+      emit playerChanged(value.value<Object::Path>());
       break;
 
     case Property::ServicesResolved:

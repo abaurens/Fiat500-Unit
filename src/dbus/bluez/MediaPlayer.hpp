@@ -1,18 +1,17 @@
 #pragma once
 
 #include "dbus/bluez/Types.hpp"
-#include "dbus/bluez/Object.hpp"
+#include "dbus/Object.hpp"
 
 #include <QTimer>
 #include <QObject>
-#include <QDBusObjectPath>
 
 #include <array>
 
 namespace DBus::Bluez
 {
   class MediaPlayer;
-  using MediaPlayerMap = QMap<QDBusObjectPath, MediaPlayer *>;
+  using MediaPlayerMap = QMap<Object::Path, MediaPlayer *>;
 
   class MediaPlayer : public Object
   {
@@ -94,13 +93,7 @@ namespace DBus::Bluez
     static constexpr Name InterfaceName = "org.bluez.MediaPlayer1";
 
   public:
-    explicit MediaPlayer(const QDBusObjectPath &path,
-                         const InterfaceMap &interfaces,
-                         QObject *parent = nullptr);
-
-    explicit MediaPlayer(const QDBusObjectPath &path,
-                         const PropertyMap &properties,
-                         QObject *parent = nullptr);
+    explicit MediaPlayer(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent = nullptr);
 
     bool repeat() const;
     bool shuffle() const;
@@ -112,16 +105,16 @@ namespace DBus::Bluez
 
     TrackInfo track() const;
 
-    QDBusObjectPath device() const;
+    Object::Path device() const;
 
   public slots:
-    QDBusPendingReply<> setRepeat(bool repeat);
-    QDBusPendingReply<> setShuffle(bool shuffle);
+    void setRepeat(bool repeat);
+    void setShuffle(bool shuffle);
 
-    QDBusPendingReply<> play();
-    QDBusPendingReply<> pause();
-    QDBusPendingReply<> next();
-    QDBusPendingReply<> previous();
+    void play();
+    void pause();
+    void next();
+    void previous();
 
   signals:
     void repeatChanged(bool);
@@ -144,6 +137,8 @@ namespace DBus::Bluez
     void updatePosition();
 
   private:
+    explicit MediaPlayer(const Object::Path &path, const PropertyMap &properties, QObject *parent = nullptr);
+
     void onStatusChanged(const Status status);
     virtual void onPropertyChanged(const QString &name, const QVariant &value) override;
 

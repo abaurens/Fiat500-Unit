@@ -23,14 +23,16 @@
     MediaPlayer   \
   )
 
-#define DECLARE_MANAGED_OBJECT(_type, _name)                                    \
-    void _name##Added(const QDBusObjectPath &path, DBus::Bluez::_type &object); \
-    void _name##Removed(const QDBusObjectPath &path);                           \
-  private:                                                                      \
-    void addObject(_type &device);                                              \
-    void removeObject(_type &device);                                           \
-    bool getObject(const QDBusObjectPath &path, _type *(&device));              \
+#define DECLARE_MANAGED_OBJECT(_type, _name)                                 \
+    void _name##Added(const Object::Path &path, DBus::Bluez::_type &object); \
+    void _name##Removed(const Object::Path &path);                           \
+  private:                                                                   \
+    void addObject(_type &object);                                           \
+    void removeObject(_type &object);                                        \
+    bool getObject(const Object::Path &path, _type *(&object));              \
     _type##Map m_##_name##s
+    // inline bool getAssociatedObject(const Object &source,  _type *(&object)) \
+    // { return getObject(source.path(), object); }                             \
 
 namespace DBus::Bluez
 {
@@ -48,11 +50,36 @@ namespace DBus::Bluez
     static MediaPlayerMap &mediaPlayers() { return instance().m_mediaPlayers; }
     static MediaControlMap &mediaControls() { return instance().m_mediaControls; }
 
+    /// Return an object of type T associated with the given object
+    /// (different interfaces of the same dbus object).
+    /// Returns nullptr if no such object exists.
+    template<class T>
+    static T *getObject(const Object &object) { return getObject<T>(object.path()); }
+
+    /// Return an object of type T associated with the given object
+    /// (different interfaces of the same dbus object).
+    /// Returns nullptr if no such object exists.
+    template<class T>
+    static T *getObject(const Object *object) { return (object ? getObject<T>(object->path()) : nullptr); }
+
+    /// Return an of type T associated with the given object path
+    /// Returns nullptr if no such object exists.
+    template<class T>
+    static T *getObject(const Object::Path &path)
+    {
+      T* object = nullptr;
+      instance().getObject(path, object);
+      return object;
+    }
+
+
   // supported objects implementation
   private:
     void addObject(Adapter &adapter);
     void removeObject(Adapter &device);
-    bool getObject(const QDBusObjectPath &path, Adapter *(&adapter));
+    bool getObject(const Object::Path &path, Adapter *(&adapter));
+    // inline bool getAssociatedObject(const Object &source, Adapter *(&adapter))
+    // { return getObject(source.path(), adapter); }
 
   signals:
     DECLARE_MANAGED_OBJECT(Device,       device);
@@ -85,29 +112,34 @@ namespace DBus::Bluez
 
   // Automatic dynamic object creation system
   private:
-    size_t createObjects(const QDBusObjectPath &path, const InterfaceMap &interfaces) {
+    size_t createObjects(const Object::Path &path, const InterfaceMap &interfaces) {
       return tryCreateAll<BLUEZ_OBJECT_TYPELIST>(path, interfaces);
     }
 
-    size_t removeObjects(const QDBusObjectPath &path, const QStringList &interfaces) {
+    size_t removeObjects(const Object::Path &path, const QStringList &interfaces) {
       return tryRemoveAll<BLUEZ_OBJECT_TYPELIST>(path, interfaces);
     }
 
     template<class ... ObjTypes>
-    size_t tryCreateAll(const QDBusObjectPath &path, const InterfaceMap &interfaces);
+    size_t tryCreateAll(const Object::Path &path, const InterfaceMap &interfaces);
 
     template<class ... ObjTypes>
-    size_t tryRemoveAll(const QDBusObjectPath &path, const QStringList &interfaces);
+    size_t tryRemoveAll(const Object::Path &path, const QStringList &interfaces);
 
     template<class ObjType>
-    size_t  tryCreate(const QDBusObjectPath &path, const InterfaceMap &interfaces);
+    size_t  tryCreate(const Object::Path &path, const InterfaceMap &interfaces);
 
     template<class ObjType>
-    size_t  tryRemove(const QDBusObjectPath &path, const QStringList &interfaces);
+    size_t  tryRemove(const Object::Path &path, const QStringList &interfaces);
   };
 }
 
 #include "Manager.tpp"
+
+// To remove warning from "unused" include above
+namespace {
+  static constexpr int __unused__ = DBus::Bluez::__unused__;
+}
 
 #undef BLUEZ_OBJECT_TYPELIST
 #undef DECLARE_MANAGED_OBJECT

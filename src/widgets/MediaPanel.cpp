@@ -1,6 +1,7 @@
 #include "sizes.hpp"
 #include "MediaPanel.hpp"
 #include "dbus/bluez/Types.hpp"
+#include "dbus/bluez/Manager.hpp"
 
 #include <QVBoxLayout>
 
@@ -56,14 +57,34 @@ MediaPanel::MediaPanel(QWidget *parent)
   APPLY_MIN_SIZE(m_timeline);
 }
 
+void MediaPanel::setMediaControler(MediaControl *controler)
+{
+  if (m_controler)
+  {
+    disconnect(
+      m_controler,  &DBus::Bluez::MediaControl::playerChanged,
+      this,         &MediaPanel::setMediaPlayer
+    );
+  }
+
+  m_controler = controler;
+
+  if (!controler)
+    return;
+
+  setMediaPlayer(DBus::Bluez::Manager::getObject<MediaPlayer>(controler->player()));
+
+  connect(
+    controler, &DBus::Bluez::MediaControl::playerChanged,
+    this,      &MediaPanel::setMediaPlayer
+  );
+}
+
 void MediaPanel::setMediaPlayer(MediaPlayer *player)
 {
-  /// TODO: We may want a menu allowing to select which media controler we want to use
   // Don't overwrite the controler if we already have one
   if (player == m_mediaPlayer)
     return;
-
-  qDebug() << "Setting media player to" << player->path().path();
 
   if (m_mediaPlayer != nullptr)
   {
@@ -80,60 +101,6 @@ void MediaPanel::setMediaPlayer(MediaPlayer *player)
   m_mediaPlayer = player;
 
   const bool playerExist = (m_mediaPlayer != nullptr);
-  if (playerExist)
-  {
-    connect(
-      player, &MediaPlayer::trackChanged,
-      this,   &MediaPanel::setTrackInfo
-    );
-
-    connect(
-      player, &MediaPlayer::positionChanged,
-      [this](uint32_t pos) {
-        uint32_t sec = pos / 1000;
-        uint32_t min = sec / 60;
-        sec -= (min * 60);
-        m_timeline->setFormat(QString("%1:%2").arg(min).arg(sec));
-        m_timeline->setValue(static_cast<int>(pos));
-      }
-    );
-
-    connect(
-      m_play, &QPushButton::clicked,
-      player, &MediaPlayer::play
-    );
-
-    connect(
-      m_pause, &QPushButton::clicked,
-      player, &MediaPlayer::pause
-    );
-
-    connect(
-      m_nextTrack, &QPushButton::clicked,
-      player,      &MediaPlayer::next
-    );
-
-    connect(
-      m_previousTrack, &QPushButton::clicked,
-      player,          &MediaPlayer::previous
-    );
-
-    //connect(
-    //  m_timeline, &QSlider::sliderMoved,
-    //  [this](int pos) {
-    //    qDebug() << "timeline manually moved to" << pos;
-    //    m_mediaPlayer->setPosition(static_cast<uint32_t>(pos));
-    //  }
-    //);
-
-    setTrackInfo(player->track());
-    m_timeline->setValue(static_cast<int>(player->position()));
-  }
-  else
-  {
-    setTrackInfo({});
-    m_timeline->setValue(0);
-  }
 
   m_play->setEnabled(playerExist);
   m_pause->setEnabled(playerExist);
@@ -141,6 +108,66 @@ void MediaPanel::setMediaPlayer(MediaPlayer *player)
   m_previousTrack->setEnabled(playerExist);
 
   m_timeline->setEnabled(playerExist);
+
+  if (!playerExist)
+  {
+    setTrackInfo({});
+    m_timeline->setValue(0);
+    return;
+  }
+
+  connect(
+    player, &MediaPlayer::trackChanged,
+    this,   &MediaPanel::setTrackInfo
+  );
+
+  connect(
+    player, &MediaPlayer::positionChanged,
+    [this](uint32_t pos) {
+      pos %= m_timeline->maximum();
+
+      uint32_t sec = pos / 1000;
+
+      uint32_t hrs = sec / 3600;
+      sec -= (hrs * 3600);
+
+      uint32_t min = sec / 60;
+      sec -= (min * 60);
+
+      if (hrs > 0)
+      {
+        m_timeline->setFormat(QString("%1:%2:%3").arg(hrs).arg(min, 2, 10, '0').arg(sec, 2, 10, '0'));
+      }
+      else
+      {
+        m_timeline->setFormat(QString("%1:%2").arg(min, 2, 10, '0').arg(sec, 2, 10, '0'));
+      }
+      m_timeline->setValue(static_cast<int>(pos));
+    }
+  );
+
+  connect(
+    m_play, &QPushButton::clicked,
+    player, &MediaPlayer::play
+  );
+
+  connect(
+    m_pause, &QPushButton::clicked,
+    player, &MediaPlayer::pause
+  );
+
+  connect(
+    m_nextTrack, &QPushButton::clicked,
+    player,      &MediaPlayer::next
+  );
+
+  connect(
+    m_previousTrack, &QPushButton::clicked,
+    player,          &MediaPlayer::previous
+  );
+
+  setTrackInfo(player->track());
+  m_timeline->setValue(static_cast<int>(player->position()));
 }
 
 void MediaPanel::setTrackInfo(const DBus::Bluez::TrackInfo &track)

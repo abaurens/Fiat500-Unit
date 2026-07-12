@@ -31,10 +31,10 @@ qt_add_executable(Fiat500-Unit
     src/MainWindow.hpp
 
     src/dbus/Types.hpp src/dbus/Types.cpp
+    src/dbus/Object.hpp src/dbus/Object.cpp
 
     src/dbus/bluez/Types.hpp
 
-    src/dbus/bluez/Object.hpp src/dbus/bluez/Object.cpp
     src/dbus/bluez/Device.hpp src/dbus/bluez/Device.cpp
     src/dbus/bluez/Adapter.hpp src/dbus/bluez/Adapter.cpp
     src/dbus/bluez/MediaPlayer.hpp src/dbus/bluez/MediaPlayer.cpp

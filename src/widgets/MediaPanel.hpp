@@ -8,28 +8,33 @@
 #include <QProgressBar>
 
 #include "dbus/bluez/MediaPlayer.hpp"
+#include "dbus/bluez/MediaControl.hpp"
 
 class MediaPanel : public QGroupBox
 {
   Q_OBJECT
 
   using MediaPlayer = DBus::Bluez::MediaPlayer;
+  using MediaControl = DBus::Bluez::MediaControl;
 
 public:
   explicit MediaPanel(QWidget *parent = nullptr);
 
   const MediaPlayer *mediaPlayer() const { return m_mediaPlayer; }
+  const MediaControl *mediaControler() const { return m_controler; }
 
 public slots:
-  void setMediaPlayer(DBus::Bluez::MediaPlayer *controler);
+  void setMediaControler(DBus::Bluez::MediaControl *controler);
 
 signals:
 
 private slots:
+  void setMediaPlayer(DBus::Bluez::MediaPlayer *player);
   void setTrackInfo(const DBus::Bluez::TrackInfo &track);
 
 private:
-  MediaPlayer  *m_mediaPlayer = nullptr;
+  MediaControl  *m_controler = nullptr;
+  MediaPlayer   *m_mediaPlayer = nullptr;
 
 private:
   QLabel *m_artist;

@@ -44,7 +44,7 @@ namespace DBus::Bluez
 
   void Manager::removeObject(Adapter &adapter)
   {
-    const QDBusObjectPath &path = adapter.path();
+    const Object::Path &path = adapter.path();
 
     if (!m_adapter || path != m_adapter->path())
       return;
@@ -55,7 +55,7 @@ namespace DBus::Bluez
     m_adapter = nullptr;
   }
 
-  bool Manager::getObject(const QDBusObjectPath &path, Adapter *(&adapter))
+  bool Manager::getObject(const Object::Path &path, Adapter *(&adapter))
   {
     if (!m_adapter || path != m_adapter->path())
       return false;
@@ -81,7 +81,7 @@ namespace DBus::Bluez
 
   void Manager::removeObject(Device &device)
   {
-    const QDBusObjectPath &path = device.path();
+    const Object::Path &path = device.path();
 
     auto it = m_devices.find(path);
     if (it == m_devices.end())
@@ -95,7 +95,7 @@ namespace DBus::Bluez
     m_devices.erase(it);
   }
 
-  bool Manager::getObject(const QDBusObjectPath &path, Device *(&device))
+  bool Manager::getObject(const Object::Path &path, Device *(&device))
   {
     auto it = m_devices.find(path);
 
@@ -122,7 +122,7 @@ namespace DBus::Bluez
 
   void Manager::removeObject(MediaControl &controler)
   {
-    const QDBusObjectPath &path = controler.path();
+    const Object::Path &path = controler.path();
 
     auto it = m_mediaControls.find(path);
     if (it == m_mediaControls.end())
@@ -136,7 +136,7 @@ namespace DBus::Bluez
     m_mediaControls.erase(it);
   }
 
-  bool Manager::getObject(const QDBusObjectPath &path, MediaControl *(&controler))
+  bool Manager::getObject(const Object::Path &path, MediaControl *(&controler))
   {
     auto it = m_mediaControls.find(path);
 
@@ -163,7 +163,7 @@ namespace DBus::Bluez
 
   void Manager::removeObject(MediaPlayer &player)
   {
-    const QDBusObjectPath &path = player.path();
+    const Object::Path &path = player.path();
 
     auto it = m_mediaPlayers.find(path);
     if (it == m_mediaPlayers.end())
@@ -177,7 +177,7 @@ namespace DBus::Bluez
     m_mediaPlayers.erase(it);
   }
 
-  bool Manager::getObject(const QDBusObjectPath &path, MediaPlayer *(&player))
+  bool Manager::getObject(const Object::Path &path, MediaPlayer *(&player))
   {
     auto it = m_mediaPlayers.find(path);
 
@@ -188,27 +188,6 @@ namespace DBus::Bluez
     return true;
   }
 }
-
-// #include <concepts>
-//
-//template<class ... Ts>
-//class TypeList
-//{
-//public:
-//  template<class ...Args, class Func>
-//  void forEach(Func && fnc, Args &&... args)
-//  {
-//    (... , forEach_1<Ts, Args..., Func>(std::forward<Func>(fnc), std::forward<Args>(args)...));
-//  }
-//
-//private:
-//  template<class T, class ...Args, class Func>
-//  void forEach_1(Func && fnc, Args &&... args)
-//  {
-//    T *_dummy = nullptr;
-//    fnc(_dummy, std::forward<Args>(args)...);
-//  }
-//};
 
 // Implementation details
 namespace DBus::Bluez
@@ -281,45 +260,14 @@ namespace DBus::Bluez
     return objects;
   }
 
-  void Manager::onInterfacesAdded(const QDBusObjectPath &path, const InterfaceMap &interfaces)
+  void Manager::onInterfacesAdded(const Object::Path &path, const InterfaceMap &interfaces)
   {
     LOG_DBG(interface_added, "Added:" << path.path());
-
-    //if (interfaces.contains(Device::InterfaceName))
-    //{
-    //  LOG_DBG(interface_added, "Device connected:" << path.path());
-    //
-    //  if constexpr (DBG::log_interface_added)
-    //  {
-    //    if (interfaces.isEmpty())
-    //      LOG_DBG(interface_added, "Interfaces: [ EMPTY ]");
-    //    else
-    //      LOG_DBG(interface_added, "Interfaces:");
-    //    for (auto it = interfaces.cbegin(); it != interfaces.cend(); ++it)
-    //    {
-    //      LOG_DBG(interface_added, "  [" << it.key() << "] = " << it.value());
-    //    }
-    //  }
-    //
-    //  if constexpr (DBG::log_interface_added)
-    //  {
-    //    const PropertyMap &properties = interfaces.value("org.bluez.Device1");
-    //
-    //    if (properties.isEmpty())
-    //      LOG_DBG(interface_added, "Device properties: [ EMPTY ]");
-    //    else
-    //      LOG_DBG(interface_added, "Device properties:");
-    //    for (auto it = properties.cbegin(); it != properties.cend(); ++it)
-    //      LOG_DBG(interface_added, "  [" << it.key() << "] = " << it.value());
-    //  }
-    //
-    //  addDevice(path, interfaces);
-    //}
 
     createObjects(path, interfaces);
   }
 
-  void Manager::onInterfacesRemoved(const QDBusObjectPath &path, const QStringList &interfaces)
+  void Manager::onInterfacesRemoved(const Object::Path &path, const QStringList &interfaces)
   {
     LOG_DBG(interface_removed, "Removed:" << path.path());
 

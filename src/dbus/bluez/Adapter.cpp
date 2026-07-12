@@ -2,11 +2,11 @@
 
 namespace DBus::Bluez
 {
-  Adapter::Adapter(const QDBusObjectPath &path, const InterfaceMap &interfaces, QObject *parent)
+  Adapter::Adapter(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent)
     : Object{ InterfaceName, path, interfaces, parent }
   {}
 
-  Adapter::Adapter(const QDBusObjectPath &path, const PropertyMap &properties, QObject *parent)
+  Adapter::Adapter(const Object::Path &path, const PropertyMap &properties, QObject *parent)
     : Object{ InterfaceName, path, properties, parent }
   {}
 
@@ -17,23 +17,23 @@ namespace DBus::Bluez
   bool Adapter::discoverable() const { return property<bool>("Discoverable"); }
   bool Adapter::discovering() const { return property<bool>("Discovering"); }
 
-  QDBusPendingReply<> Adapter::setAlias(const QString &alias)
+  void Adapter::setAlias(const QString &alias)
   {
     return Object::setProperty("Alias", alias);
   }
 
-  QDBusPendingReply<> Adapter::setPowered(bool powered)
+  void Adapter::setPowered(bool powered)
   {
     return Object::setProperty("Powered", powered);
   }
 
-  QDBusPendingReply<> Adapter::setDiscoverable(bool discoverable)
+  void Adapter::setDiscoverable(bool discoverable)
   {
     return Object::setProperty("Discoverable", discoverable);
   }
 
-  QDBusPendingReply<> Adapter::stopDiscovery() { return Object::callMethod("StopDiscovery"); }
-  QDBusPendingReply<> Adapter::startDiscovery() { return Object::callMethod("StartDiscovery"); }
+  void Adapter::stopDiscovery() { return Object::callMethod("StopDiscovery"); }
+  void Adapter::startDiscovery() { return Object::callMethod("StartDiscovery"); }
 
   void Adapter::onPropertyChanged(const QString &name, const QVariant &value)
   {

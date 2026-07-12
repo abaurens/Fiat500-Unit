@@ -26,5 +26,3 @@ namespace DBus::Bluez
     }
   };
 }
-
-// #define TOKEN_AND_NAME(__token) __token, #__token
