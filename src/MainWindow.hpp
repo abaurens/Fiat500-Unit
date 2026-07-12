@@ -2,6 +2,7 @@
 
 #include "widgets/AdapterPanel.hpp"
 #include "widgets/DevicePanel.hpp"
+#include "widgets/MediaPanel.hpp"
 
 #include <QMainWindow>
 
@@ -24,4 +25,5 @@ private slots:
 private:
   AdapterPanel *m_adapterPanel;
   DevicePanel  *m_devicePanel;
+  MediaPanel   *m_mediaPanel;
 };

@@ -8,6 +8,9 @@
 
 namespace DBus::Bluez
 {
+  class Adapter;
+  using AdapterMap = QMap<QDBusObjectPath, Adapter *>;
+
   class Adapter : public Object
   {
     Q_OBJECT
@@ -66,8 +69,5 @@ namespace DBus::Bluez
 
   private:
     virtual void onPropertyChanged(const QString &name, const QVariant &newValue) override final;
-
-  private:
-
   };
 }

@@ -190,14 +190,14 @@ void DevicePanel::selectDevice(Device *device)
   {
     m_selectedDevice = nullptr;
 
-    qDebug() << "Selection changed to NULL";
+    // qDebug() << "Selection changed to NULL";
     return;
   }
 
   m_selectedDevice = device;
   connectDevice(device);
 
-  qDebug() << "Selection changed to" << device->alias();
+  // qDebug() << "Selection changed to" << device->alias();
 }
 
 void DevicePanel::selectedDeviceAliasChanged(const QString &alias)

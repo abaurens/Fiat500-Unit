@@ -13,6 +13,8 @@ namespace DBG
   constexpr bool log_adapter_removed = false;
   constexpr bool log_device_added = false;
   constexpr bool log_device_removed = false;
+  constexpr bool log_control_added = true;
+  constexpr bool log_control_removed = true;
 }
 
 #define LOG_DBG(_case, _msg) do { if constexpr (DBG::log_##_case) { qDebug() << _msg; } } while(0)
@@ -20,6 +22,7 @@ namespace DBG
 // Bluez::Object types support
 namespace DBus::Bluez
 {
+  // Adapter object
   void Manager::addObject(Adapter &adapter)
   {
     // We don't want to replace the current adapter.
@@ -61,7 +64,7 @@ namespace DBus::Bluez
     return true;
   }
 
-
+  // Device object
   void Manager::addObject(Device &device)
   {
     m_devices.insert(device.path(), &device);
@@ -102,7 +105,110 @@ namespace DBus::Bluez
     device = *it;
     return true;
   }
+
+  // MediaControl object
+  void Manager::addObject(MediaControl &controler)
+  {
+    m_mediaControls.insert(controler.path(), &controler);
+
+    LOG_DBG(control_added,
+        "MediaControl added:"
+      << controler.path().path()
+      << controler.connected()
+    );
+
+    emit mediaControlAdded(controler.path(), controler);
+  }
+
+  void Manager::removeObject(MediaControl &controler)
+  {
+    const QDBusObjectPath &path = controler.path();
+
+    auto it = m_mediaControls.find(path);
+    if (it == m_mediaControls.end())
+      return;
+
+    LOG_DBG(control_removed, "MediaControl removed:" << path.path());
+
+    emit mediaControlRemoved(path);
+
+    delete *it;
+    m_mediaControls.erase(it);
+  }
+
+  bool Manager::getObject(const QDBusObjectPath &path, MediaControl *(&controler))
+  {
+    auto it = m_mediaControls.find(path);
+
+    if (it == m_mediaControls.end())
+      return false;
+
+    controler = *it;
+    return true;
+  }
+
+  // MediaControl object
+  void Manager::addObject(MediaPlayer &player)
+  {
+    m_mediaPlayers.insert(player.path(), &player);
+
+    LOG_DBG(control_added,
+        "MediaPlayer added:"
+      << (player.name().isEmpty() ? player.path().path() : player.name())
+      << player.path().path()
+    );
+
+    emit mediaPlayerAdded(player.path(), player);
+  }
+
+  void Manager::removeObject(MediaPlayer &player)
+  {
+    const QDBusObjectPath &path = player.path();
+
+    auto it = m_mediaPlayers.find(path);
+    if (it == m_mediaPlayers.end())
+      return;
+
+    LOG_DBG(control_removed, "MediaPlayer removed:" << path.path());
+
+    emit mediaPlayerRemoved(path);
+
+    delete *it;
+    m_mediaPlayers.erase(it);
+  }
+
+  bool Manager::getObject(const QDBusObjectPath &path, MediaPlayer *(&player))
+  {
+    auto it = m_mediaPlayers.find(path);
+
+    if (it == m_mediaPlayers.end())
+      return false;
+
+    player = *it;
+    return true;
+  }
 }
+
+// #include <concepts>
+//
+//template<class ... Ts>
+//class TypeList
+//{
+//public:
+//  template<class ...Args, class Func>
+//  void forEach(Func && fnc, Args &&... args)
+//  {
+//    (... , forEach_1<Ts, Args..., Func>(std::forward<Func>(fnc), std::forward<Args>(args)...));
+//  }
+//
+//private:
+//  template<class T, class ...Args, class Func>
+//  void forEach_1(Func && fnc, Args &&... args)
+//  {
+//    T *_dummy = nullptr;
+//    fnc(_dummy, std::forward<Args>(args)...);
+//  }
+//};
 
 // Implementation details
 namespace DBus::Bluez

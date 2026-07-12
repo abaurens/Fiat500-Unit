@@ -8,6 +8,8 @@
 #include <QDBusObjectPath>
 #include <QDBusPendingReply>
 
+#include <optional>
+
 namespace DBus::Bluez
 {
   inline constexpr Name Service = "org.bluez";
@@ -33,14 +35,44 @@ namespace DBus::Bluez
     virtual ~Object();
 
     template<typename T>
+    std::optional<T> tryProperty(const QString &name) const
+    {
+      auto it = m_properties.find(name);
+
+      if (it == m_properties.cend())
+        return std::nullopt;
+
+      return normalizeVariant(*it).template value<T>();
+    }
+
+    template<typename T>
     T property(const QString &name) const
     {
-      if (!m_properties.contains(name))
-      {
+      const std::optional<T> &result = tryProperty<T>(name);
+
+      if (!result.has_value())
         qWarning() << "Object" << m_interfaceName << " does not have a property " << name;
-      }
-      Q_ASSERT(m_properties.contains(name));
-      return m_properties.value(name).template value<T>();
+      Q_ASSERT(result.has_value());
+
+      return result.value();
+    }
+
+    template<typename T>
+    T propertyOr(const QString &name, T && defaultValue) const
+    {
+      return tryProperty<T>(name).value_or(std::forward<T>(defaultValue));
+    }
+
+    template<typename T>
+    std::optional<T> refreshProperty(const QString &name)
+    {
+      QVariant value = getProperty(name);
+
+      PropertyMap map;
+      map.insert(name, value);
+
+      updateProperties(m_interfaceName, map, {});
+      return tryProperty<T>(name);
     }
 
     /// Uses callMethod_impl to call methods on the current interface.
@@ -65,7 +97,40 @@ namespace DBus::Bluez
       );
     }
 
-    virtual void onPropertyChanged(const QString &name, const QVariant &newValue) {}
+    /// Uses callMethod_impl to call the Get method on the "org.freedesktop.DBus.Properties" interface.
+    QVariant getProperty(const QString &propertyName)
+    {
+      QDBusPendingReply<QDBusVariant> reply = callMethod_impl(
+        "Get", Interface::Properties,
+        m_interfaceName, propertyName
+      );
+
+      reply.waitForFinished();
+
+      if (reply.isError())
+      {
+        qWarning() << reply.error().message();
+        return {};
+      }
+
+      const QVariant &property = normalizeVariant(reply.value().variant());
+
+      if (property != m_properties.value(propertyName, {}))
+        m_properties[propertyName] = property;
+      return property;
+    }
+
+    virtual void onPropertyChanged(const QString &name, const QVariant &newValue, [[maybe_unused]] const QVariant &oldValue)
+    {
+      return onPropertyChanged(name, newValue);
+    }
+
+    virtual void onPropertyChanged(const QString &name, const QVariant &value)
+    {
+     #ifndef NDEBUG
+      qDebug() << m_path.path() << ": Unhandled property " << name << "changed to" << value;
+     #endif
+    }
 
   signals:
     void propertyChanged(const QStringView name, const QVariant &value);
@@ -75,8 +140,11 @@ namespace DBus::Bluez
     void onPropertiesChanged_dbus(const QString &interface, const QDBusMessage &changed);
 
   private:
+    static QVariant normalizeVariant(const QVariant &value);
+
     void subscribeToDBus();
     void unsubscribeFromDBus();
+    void updateProperty(const QString &propertyName, const QVariant &newValue);
     void updateProperties(const QString &interface, const QVariantMap &changed, const QStringList &invalidated);
 
     /// Generic helper that calls a method on arbitrary D-Bus interface.

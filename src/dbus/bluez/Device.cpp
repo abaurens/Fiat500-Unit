@@ -20,7 +20,6 @@ namespace DBus::Bluez
   QString Device::alias() const { return property<QString>("Alias"); }
   QString Device::address() const { return property<QString>("Address"); }
 
-
   QDBusPendingReply<> Device::pair() { return callMethod("Pair"); }
   QDBusPendingReply<> Device::trust() { return setTrusted(true); }
   QDBusPendingReply<> Device::untrust() { return setTrusted(false); }
@@ -56,13 +55,17 @@ namespace DBus::Bluez
       emit blockedChanged(value.toBool());
       break;
 
+    case Property::Player:
+      emit playerChanged(value.value<QDBusObjectPath>());
+      break;
+
     case Property::ServicesResolved:
       emit servicesResolvedChanged(value.toBool());
       break;
 
     default:
      #ifndef NDEBUG
-      qDebug() << "Unhandled property:" << name;
+      qDebug() << m_path.path() << ": Unhandled property " << name << "changed to" << value;
      #endif
       break;
     }

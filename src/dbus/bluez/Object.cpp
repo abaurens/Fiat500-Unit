@@ -20,29 +20,44 @@ namespace DBus::Bluez
     unsubscribeFromDBus();
   }
 
+  QVariant Object::normalizeVariant(const QVariant &value)
+  {
+    if (value.userType() == qMetaTypeId<QDBusArgument>())
+    {
+      PropertyMap map;
+
+      const QDBusArgument &arg = qvariant_cast<QDBusArgument>(value);
+      arg >> map;
+
+      return { map };
+    }
+
+    return value;
+  }
+
   void Object::updateProperties(const QString &interface, const PropertyMap &properties, const QStringList &invalidated)
   {
-    // qDebug() << "Interface:  " << interface;
-    // qDebug() << "Invalidated:" << invalidated;
-    // qDebug() << "Properties: ";
-
     for (auto it = properties.cbegin(); it != properties.cend(); ++it)
     {
       const QString &propertyName = it.key();
-      const QVariant oldValue = m_properties.value(propertyName);
       const QVariant &newValue = it.value();
 
-      // qDebug() << "  [" << propertyName << "] = " << newValue << " (was" << oldValue << ")";
-
-      if (oldValue != newValue)
-      {
-        m_properties[propertyName] = newValue;
-        onPropertyChanged(propertyName, newValue);
-        emit propertyChanged(propertyName, newValue);
-      }
+      updateProperty(propertyName, normalizeVariant(newValue));
     }
 
     emit propertiesChanged();
+  }
+
+  void Object::updateProperty(const QString &propertyName, const QVariant &newValue)
+  {
+    const QVariant &oldValue = m_properties.value(propertyName);
+
+    if (oldValue == newValue)
+      return;
+
+    m_properties[propertyName] = newValue;
+    onPropertyChanged(propertyName, newValue, oldValue);
+    emit propertyChanged(propertyName, newValue);
   }
 
   void Object::onPropertiesChanged_dbus(const QString &interface, const QDBusMessage &message)
@@ -65,7 +80,7 @@ namespace DBus::Bluez
       this, SLOT(onPropertiesChanged_dbus(QString, QDBusMessage))
     );
 
-    qDebug() << "Subscribed to" << Service << m_path.path() << Interface::Properties << Method::PropertiesChanged;
+    // qDebug() << "Subscribed to" << Service << m_path.path() << Interface::Properties << Method::PropertiesChanged;
 
     Q_ASSERT(ok);
   }
@@ -77,7 +92,7 @@ namespace DBus::Bluez
       this, SLOT(onPropertiesChanged_dbus(QString, QDBusMessage))
     );
 
-    qDebug() << "unsibscribed from" << Service << m_path.path() << Interface::Properties << Method::PropertiesChanged;
+    // qDebug() << "unsibscribed from" << Service << m_path.path() << Interface::Properties << Method::PropertiesChanged;
 
     Q_ASSERT(ok);
   }
