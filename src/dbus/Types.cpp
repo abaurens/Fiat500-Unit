@@ -10,7 +10,6 @@ void registerDBusTypes()
 
 QDBusArgument &operator<<(QDBusArgument &argument, const InterfaceMap &map)
 {
-  qDebug() << "beginMap";
   argument.beginMap(
     QMetaType::fromType<QString>(),
     QMetaType::fromType<PropertyMap>()
@@ -18,22 +17,13 @@ QDBusArgument &operator<<(QDBusArgument &argument, const InterfaceMap &map)
 
   for (auto it = map.cbegin(); it != map.cend(); ++it)
   {
-     qDebug() << "entry";
     argument.beginMapEntry();
-
-    qDebug() << "key";
     argument << it.key();
-
-    qDebug() << "value";
     argument << it.value();
-
-    qDebug() << "end entry";
     argument.endMapEntry();
   }
 
-  qDebug() << "endMap";
   argument.endMap();
-
   return argument;
 }
 

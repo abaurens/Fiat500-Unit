@@ -1,23 +1,23 @@
 // #include "dbus/bluez/Manager.hpp"
 
+#include "widgets/sizes.hpp"
 #include "MainWindow.hpp"
 
-#include <QSize>
+#include <QFrame>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSpacerItem>
 
 static constexpr QSize buttonSize { 100, 120 };
+static constexpr QSize buttinIconSize { 70, 70 };
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
   QVBoxLayout *buttonLayout = new QVBoxLayout();
-  m_musicPageButton = new QPushButton(tr("Music"));
-  m_settingsPageButton = new QPushButton(tr("Settings"));
+  m_musicPageButton = new QPushButton();
+  m_settingsPageButton = new QPushButton();
 
-  m_musicPageButton->setMinimumSize(buttonSize);
-  m_settingsPageButton->setMinimumSize(buttonSize);
-
+  buttonLayout->setSpacing(20);
   buttonLayout->addWidget(m_musicPageButton);
   buttonLayout->addWidget(m_settingsPageButton);
   buttonLayout->addStretch();
@@ -43,13 +43,32 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     }
   );
 
+  QFrame *separator = new QFrame();
+  separator->setFrameShape(QFrame::VLine);
+  separator->setFrameShadow(QFrame::Plain);
+
   QHBoxLayout *mainLayout = new QHBoxLayout();
   mainLayout->addLayout(buttonLayout);
+  mainLayout->addWidget(separator);
   mainLayout->addWidget(m_stackedWidget);
 
   QWidget *centralWidget = new QWidget(this);
   centralWidget->setLayout(mainLayout);
   setCentralWidget(centralWidget);
+
+  QFont fnt = font();
+  fnt.setPointSize(UI::Size::font);
+  setFont(fnt);
+
+
+  m_musicPageButton->setIcon(QIcon(":/icons-outline/music"));
+  m_settingsPageButton->setIcon(QIcon(":/icons-outline/settings"));
+
+  m_musicPageButton->setIconSize(buttinIconSize);
+  m_settingsPageButton->setIconSize(buttinIconSize);
+
+  m_musicPageButton->setMinimumSize(buttonSize);
+  m_settingsPageButton->setMinimumSize(buttonSize);
 }
 
 MainWindow::~MainWindow() = default;

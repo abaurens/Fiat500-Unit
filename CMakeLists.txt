@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(Fiat500-Unit  VERSION 1.0 LANGUAGES C CXX)
 
+set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -10,6 +11,7 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS
     DBus
     Widgets
     Bluetooth
+    SvgWidgets
     Concurrent
     SerialPort
     LinguistTools
@@ -22,6 +24,8 @@ qt_standard_project_setup()
 
 qt_add_executable(Fiat500-Unit
     WIN32 MACOSX_BUNDLE
+
+    resources.qrc
 
     src/main.cpp
 
@@ -67,6 +71,7 @@ target_link_libraries(Fiat500-Unit PRIVATE
     Qt::DBus
     Qt::Widgets
     Qt::Bluetooth
+    Qt6::SvgWidgets
 )
 
 # Add Windows specific sources
@@ -77,6 +82,11 @@ if(WIN32)
     target_link_libraries(Fiat500-Unit PRIVATE
         user32
     )
+
+target_compile_definitions(Fiat500-Unit
+    PRIVATE
+    "NO_FULLSCREEN=true"
+)
 endif()
 
 # Add linux specific sources

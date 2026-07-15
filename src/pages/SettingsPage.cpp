@@ -1,11 +1,10 @@
-// #include "dbus/bluez/Manager.hpp"
-
+#include "widgets/sizes.hpp"
 #include "SettingsPage.hpp"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
-SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent)
+SettingsPage::SettingsPage(QWidget *parent) : QGroupBox(tr("Settings"), parent)
 {
 
 }

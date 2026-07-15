@@ -225,17 +225,6 @@ namespace DBus::Bluez
       createObjects(it.key(), interfaces);
     }
 
-    // DEBUG InterfaceMap operator
-    {
-      QDBusArgument arg;
-
-      InterfaceMap map;
-
-      arg << map;
-
-      qDebug() << "ok";
-    }
-
     m_bus.connect(
       Service, RootPath, Interface::ObjectManager, Method::InterfacesAdded,
       this, SLOT(onInterfacesAdded(QDBusObjectPath, InterfaceMap))

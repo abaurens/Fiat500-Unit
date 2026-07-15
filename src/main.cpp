@@ -5,15 +5,21 @@
 #include <QTranslator>
 #include <QLocale>
 
-#define DEBUG_PANEL true
+#define DEBUG_PANEL false
 
 #if DEBUG_PANEL
 # include "Widgets/DebugPanel.hpp"
 using WindowType = DebugPanel;
-# define showFullScreen show
+#ifndef NO_FULLSCREEN
+#  define NO_FULLSCREEN true
+# endif
 #else
 # include "MainWindow.hpp"
 using WindowType = MainWindow;
+#endif
+
+#ifdef NO_FULLSCREEN
+# define showFullScreen show
 #endif
 
 int main(int argc, char *argv[])
@@ -32,11 +38,12 @@ int main(int argc, char *argv[])
   //  }
   //}
 
-  registerDBusTypes();
-  DBus::Bluez::Manager::initialize();
+  // registerDBusTypes();
+  // DBus::Bluez::Manager::initialize();
 
   WindowType w;
 
+  w.setFixedSize(1280, 800);
   w.showFullScreen();
   return QApplication::exec();
 }
