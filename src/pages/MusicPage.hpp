@@ -2,7 +2,6 @@
 
 #include <QImage>
 #include <QLabel>
-#include <QGroupBox>
 #include <QPushButton>
 #include <QProgressBar>
 

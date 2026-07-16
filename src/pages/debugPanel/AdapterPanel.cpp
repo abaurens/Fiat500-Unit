@@ -1,6 +1,6 @@
 #include "AdapterPanel.hpp"
 
-#include "sizes.hpp"
+#include "widgets/sizes.hpp"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>

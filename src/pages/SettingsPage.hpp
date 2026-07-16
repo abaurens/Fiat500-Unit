@@ -1,16 +1,14 @@
 #pragma once
 
+#include "menu/widgets/Navigator.hpp"
 
-#include <QGroupBox>
-
-class SettingsPage : public QGroupBox
+class SettingsPage : public Navigator
 {
   Q_OBJECT
 
 public:
   explicit SettingsPage(QWidget *parent = nullptr);
 
-
 private:
-
+  Menu *m_memu;
 };

@@ -16,9 +16,9 @@ MusicPage::MusicPage(QWidget *parent) : QWidget(parent)
   \**************************/
 
   m_cover = new QLabel();
-  m_title = new QLabel("Track title goes here");
-  m_album = new QLabel("Album title");
-  m_artist = new QLabel("Artist name");
+  m_title = new QLabel("Breakn' a Sweat (feat the Doors)");
+  m_album = new QLabel("Bangarang");
+  m_artist = new QLabel("Skrillex");
 
   m_playPause = new QPushButton();
   m_nextTrack = new QPushButton();
@@ -29,6 +29,7 @@ MusicPage::MusicPage(QWidget *parent) : QWidget(parent)
   m_remainingTime = new QLabel("00:00", this);
 
   m_coverImage.load(":/img/defaultCover");
+  m_coverImage.load(":/img/skrillex");
 
   /**************************\
   |*    Widgets settings    *|

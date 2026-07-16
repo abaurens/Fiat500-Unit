@@ -1,30 +1,54 @@
 #include "dbus/bluez/Manager.hpp"
 #include "dbus/Types.hpp"
 
+#include "MainWindow.hpp"
+
+#include <QCommandLineParser>
 #include <QApplication>
 #include <QTranslator>
 #include <QLocale>
 
-#define DEBUG_PANEL false
+enum : size_t
+{
+  opt_no_fullscreen,
+  opt_count
+};
 
-#if DEBUG_PANEL
-# include "Widgets/DebugPanel.hpp"
-using WindowType = DebugPanel;
-#ifndef NO_FULLSCREEN
-#  define NO_FULLSCREEN true
-# endif
-#else
-# include "MainWindow.hpp"
-using WindowType = MainWindow;
-#endif
+static bool g_flags[opt_count] = { 0 };
 
-#ifdef NO_FULLSCREEN
-# define showFullScreen show
-#endif
+void parseArgs(QApplication &app)
+{
+
+  constexpr const char *const commands[opt_count * 3] = {
+    "nfc", "no-fullscreen", "Disable fullscreen launch (useful when testing on a PC)"
+  };
+
+  QCommandLineParser parser;
+  std::vector<QCommandLineOption> options;
+  {
+    options.reserve(opt_count);
+
+    for (size_t i = 0; i < opt_count; ++i)
+    {
+      options.emplace_back(
+        QStringList{ commands[i * 3], commands[i * 3 + 1] },
+        app.tr(commands[i * 3 + 2])
+      );
+
+      parser.addOption(options.back());
+    }
+  }
+  parser.process(app);
+
+  for (size_t i = 0; i < opt_count; ++i)
+    g_flags[i] = parser.isSet(options[i]);
+}
 
 int main(int argc, char *argv[])
 {
-  QApplication a(argc, argv);
+  QApplication app(argc, argv);
+
+  parseArgs(app);
 
   //QTranslator translator;
   //const QStringList uiLanguages = QLocale::system().uiLanguages();
@@ -38,12 +62,22 @@ int main(int argc, char *argv[])
   //  }
   //}
 
-  // registerDBusTypes();
-  // DBus::Bluez::Manager::initialize();
+ #ifndef NO_DBUS
+  registerDBusTypes();
+  DBus::Bluez::Manager::initialize();
+ #endif
 
-  WindowType w;
+  MainWindow window;
 
-  w.setFixedSize(1280, 800);
-  w.showFullScreen();
-  return QApplication::exec();
+  if (FULLSCREEN_ALLOWED && !g_flags[opt_no_fullscreen])
+  {
+    window.showFullScreen();
+  }
+  else
+  {
+    window.setFixedSize(1280, 800);
+    window.show();
+  }
+
+  return app.exec();
 }

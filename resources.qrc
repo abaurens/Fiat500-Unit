@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/img">
         <file alias="defaultCover">assets/images/Default Cover Image.png</file>
+        <file alias="skrillex">assets/images/Bangarang-EP.jpg</file>
     </qresource>
     <qresource prefix="/icons-filled">
         <file alias="adjustments-vert">assets/icons/tabler-icons/filled/adjustments.svg</file>
@@ -34,6 +35,11 @@
         <file alias="toggle-left">assets/icons/tabler-icons/filled/toggle-left.svg</file>
         <file alias="toggle-right">assets/icons/tabler-icons/filled/toggle-right.svg</file>
         <file alias="heart">assets/icons/tabler-icons/filled/heart.svg</file>
+        <file>assets/icons/tabler-icons/filled/brand-apple.svg</file>
+        <file alias="bug">assets/icons/tabler-icons/filled/bug.svg</file>
+        <file alias="bulb">assets/icons/tabler-icons/filled/bulb.svg</file>
+        <file alias="dots-hori">assets/icons/tabler-icons/filled/dots.svg</file>
+        <file alias="dots-vert">assets/icons/tabler-icons/filled/dots-vertical.svg</file>
     </qresource>
     <qresource prefix="/icons-outline">
         <file alias="adjustments-vert">assets/icons/tabler-icons/outline/adjustments.svg</file>
@@ -114,5 +120,16 @@
         <file alias="wifi-2">assets/icons/tabler-icons/outline/wifi-2.svg</file>
         <file alias="wifi-off">assets/icons/tabler-icons/outline/wifi-off.svg</file>
         <file alias="x">assets/icons/tabler-icons/outline/x.svg</file>
+        <file alias="android">assets/icons/tabler-icons/outline/brand-android.svg</file>
+        <file alias="apple">assets/icons/tabler-icons/outline/brand-apple.svg</file>
+        <file alias="bug">assets/icons/tabler-icons/outline/bug.svg</file>
+        <file alias="bulb">assets/icons/tabler-icons/outline/bulb.svg</file>
+        <file alias="checks">assets/icons/tabler-icons/outline/checks.svg</file>
+        <file alias="nintendo">assets/icons/tabler-icons/outline/device-nintendo.svg</file>
+        <file alias="dots-hori">assets/icons/tabler-icons/outline/dots.svg</file>
+        <file alias="dots-vert">assets/icons/tabler-icons/outline/dots-vertical.svg</file>
+        <file alias="language">assets/icons/tabler-icons/outline/language.svg</file>
+        <file alias="power">assets/icons/tabler-icons/outline/power.svg</file>
+        <file alias="slash">assets/icons/tabler-icons/outline/slash.svg</file>
     </qresource>
 </RCC>

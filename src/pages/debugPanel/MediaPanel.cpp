@@ -1,4 +1,4 @@
-#include "sizes.hpp"
+#include "widgets/sizes.hpp"
 #include "MediaPanel.hpp"
 #include "dbus/bluez/Types.hpp"
 #include "dbus/bluez/Manager.hpp"

@@ -1,4 +1,4 @@
-#include "sizes.hpp"
+#include "widgets/sizes.hpp"
 #include "DevicePanel.hpp"
 
 #include "dbus/bluez/Manager.hpp"

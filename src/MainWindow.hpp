@@ -1,14 +1,9 @@
 #pragma once
 
-#include "pages/MusicPage.hpp"
-#include "pages/SettingsPage.hpp"
+#include "widgets/SideBar.hpp"
 
 #include <QMainWindow>
-
-#include <QLineEdit>
-#include <QPushButton>
-#include <QStackedWidget>
-
+#include <QStringLiteral>
 
 class MainWindow : public QMainWindow
 {
@@ -19,11 +14,7 @@ public:
   ~MainWindow() override;
 
 private:
-  QStackedWidget *m_stackedWidget;
 
-  QPushButton *m_musicPageButton;
-  QPushButton *m_settingsPageButton;
-
-  MusicPage    *m_musicPage;
-  SettingsPage *m_settingsPage;
+private:
+  SideBar *m_sideBar;
 };
