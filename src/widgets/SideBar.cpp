@@ -4,7 +4,7 @@
 #include <QHBoxLayout>
 #include <QOverload>
 
-#include <pages/SettingsPage.hpp>
+#include <panels/SettingsPanel.hpp>
 
 SideBar::SideBar(QWidget *parent) : QWidget{ parent }
 {

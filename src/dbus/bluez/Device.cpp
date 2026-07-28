@@ -1,14 +1,16 @@
-#include "dbus/bluez/Device.hpp"
+#include "Device.hpp"
+#include "Types.hpp"
 
 #include <QDBusConnection>
+
 namespace DBus::Bluez
 {
-  Device::Device(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent)
-    : Object{ InterfaceName, path, interfaces, parent }
+  Device::Device(const Object::Path &path, const PropertyMap &properties, QObject *parent)
+    : Object{ ServiceName, InterfaceName, path, properties, parent }
   {}
 
-  Device::Device(const Object::Path &path, const PropertyMap &properties, QObject *parent)
-    : Object{ InterfaceName, path, properties, parent }
+  Device::Device(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent)
+    : Device{ path, interfaces.value(InterfaceName), parent }
   {}
 
   bool Device::paired() const { return property<bool>("Paired"); }
@@ -54,10 +56,6 @@ namespace DBus::Bluez
     case Property::Blocked:
       emit blockedChanged(value.toBool());
       break;
-
-    //case Property::Player:
-    //  emit playerChanged(value.value<Object::Path>());
-    //  break;
 
     case Property::ServicesResolved:
       emit servicesResolvedChanged(value.toBool());

@@ -13,8 +13,6 @@
 
 namespace DBus
 {
-  inline constexpr Name Service = "org.bluez";
-
   class Object : public QObject
   {
     Q_OBJECT
@@ -25,8 +23,8 @@ namespace DBus
     const Path &path() const { return m_path; };
 
   protected:
-    explicit Object(const QString &interfaceName, const Path &path, const InterfaceMap &interfaces, QObject *parent = nullptr);
-    explicit Object(const QString &interfaceName, const Path &path, const PropertyMap &properties, QObject *parent = nullptr);
+    explicit Object(const Name &serviceName, const QString &interfaceName, const Path &path, const InterfaceMap &interfaces, QObject *parent = nullptr);
+    explicit Object(const Name &serviceName, const QString &interfaceName, const Path &path, const PropertyMap &properties, QObject *parent = nullptr);
 
     virtual ~Object();
 
@@ -75,9 +73,8 @@ namespace DBus
     template<typename... Args>
     void callMethod(const QString &method, Args &&... args)
     {
-      return callMethod_protected(
-        method,
-        m_interfaceName,
+      return callMethod_protected<Args...>(
+        method, m_interfaceName,
         std::forward<Args>(args)...
       );
     }
@@ -86,7 +83,7 @@ namespace DBus
     template<typename T>
     void setProperty(const QString &propertyName, const T &value)
     {
-      return callMethod_protected(
+      return callMethod_protected<const QString&, const QString&, QVariant&&>(
         "Set", Interface::Properties,
         m_interfaceName, propertyName,
         QVariant::fromValue(QDBusVariant(QVariant::fromValue(value)))
@@ -96,7 +93,7 @@ namespace DBus
     /// Uses callMethod_impl to call the Get method on the "org.freedesktop.DBus.Properties" interface.
     QVariant getProperty(const QString &propertyName)
     {
-      QDBusPendingReply<QDBusVariant> reply = callMethod_impl(
+      QDBusPendingReply<QDBusVariant> reply = callMethod_impl<const QString&, const QString&>(
         "Get", Interface::Properties,
         m_interfaceName, propertyName
       );
@@ -105,7 +102,7 @@ namespace DBus
 
       if (reply.isError())
       {
-        qWarning() << reply.error().message();
+        Log::warning(u"Object::getProperty()"_s) << reply.error().message();
         return {};
       }
 
@@ -114,6 +111,29 @@ namespace DBus
       if (property != m_properties.value(propertyName, {}))
         m_properties[propertyName] = property;
       return property;
+    }
+
+    PropertyMap getAllProperties()
+    {
+      QDBusPendingReply<PropertyMap> reply = getAllPropertiesAsync();
+
+      reply.waitForFinished();
+
+      if (reply.isError())
+      {
+        Log::warning(u"Object::getAllProperties()"_s) << reply.error().message();
+        return {};
+      }
+
+      return reply.value();
+    }
+
+    QDBusPendingReply<PropertyMap> getAllPropertiesAsync()
+    {
+      return callMethod_impl<const QString&>(
+        "GetAll", Interface::Properties,
+        m_interfaceName
+      );
     }
 
     virtual void onPropertyChanged(const QString &name, const QVariant &newValue, [[maybe_unused]] const QVariant &oldValue)
@@ -140,15 +160,18 @@ namespace DBus
   private:
     static QVariant normalizeVariant(const QVariant &value);
 
+    void resyncProperties();
+    QDBusPendingReply<PropertyMap> resyncPropertiesAsync();
+
     void subscribeToDBus();
     void unsubscribeFromDBus();
-    void updateProperty(const QString &propertyName, const QVariant &newValue);
+    bool updateProperty(const QString &propertyName, const QVariant &newValue);
     void updateProperties(const QString &interface, const QVariantMap &changed, const QStringList &invalidated);
 
     template<typename... Args>
     void callMethod_protected(const QString &method, const QString &interface, Args &&... args)
     {
-      QDBusPendingReply<> reply = callMethod_impl(method, interface, std::forward<Args>(args)...);
+      QDBusPendingReply<> reply = callMethod_impl<Args...>(method, interface, std::forward<Args>(args)...);
 
       QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(reply, this);
 
@@ -165,7 +188,7 @@ namespace DBus
     QDBusPendingReply<> callMethod_impl(const QString &method, const QString &interface, Args &&... args)
     {
       QDBusMessage message = QDBusMessage::createMethodCall(
-        Service,
+        m_serviceName,
         m_path.path(),
         interface,
         method
@@ -178,6 +201,7 @@ namespace DBus
     }
 
   protected:
+    Name        m_serviceName;
     QString     m_interfaceName;
     Path        m_path;
     PropertyMap m_properties;

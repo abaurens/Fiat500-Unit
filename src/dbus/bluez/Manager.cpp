@@ -1,5 +1,5 @@
-#include "dbus/bluez/Manager.hpp"
-#include "dbus/Types.hpp"
+#include "Manager.hpp"
+#include "Types.hpp"
 
 #include <QDBusMessage>
 
@@ -13,11 +13,35 @@ namespace DBG
   constexpr bool log_adapter_removed = false;
   constexpr bool log_device_added = false;
   constexpr bool log_device_removed = false;
-  constexpr bool log_control_added = true;
-  constexpr bool log_control_removed = true;
+  constexpr bool log_mediaControl_added = true;
+  constexpr bool log_mediaControl_removed = true;
+  constexpr bool log_mediaPlayer_added = true;
+  constexpr bool log_mediaPlayer_removed = true;
 }
 
-#define LOG_DBG(_case, _msg) do { if constexpr (DBG::log_##_case) { qDebug() << _msg; } } while(0)
+#define LOG_DBG(_scope, _case, _msg) do { if constexpr (DBG::log_##_case) { Log::debug(_scope) << _msg; } } while(0)
+#define TYP_LOG_DBG(_scope, _case, _type, _msg) do { if constexpr (DBG::log_##_case) { (Log::debug(_scope).noquote() << _type::TypeName).quote() << _msg; } } while(0)
+
+#define OBJ_TYPE_OF(_name) std::remove_pointer_t<typename decltype(m_##_name##s)::mapped_type>
+
+#define OBJ_MAP_NAME(_name) m_##_name##s
+#define OBJ_ADDED_SIGNAL(_name) _name##Added
+#define OBJ_REMOVED_SIGNAL(_name) _name##Removed
+
+#define DEFINE_MANAGED_OBJECT(_name) \
+  void Manager::addObject(OBJ_TYPE_OF(_name) &_name)                                                \
+  {                                                                                                 \
+    using ObjType = OBJ_TYPE_OF(_name);                                                             \
+    if (!addObjectImpl<ObjType, &Manager::OBJ_ADDED_SIGNAL(_name)>(OBJ_MAP_NAME(_name), _name))     \
+      return;                                                                                       \
+    TYP_LOG_DBG(u"Manager"_s, _name##_added, ObjType, "added:" << _name);                           \
+  }                                                                                                 \
+  void Manager::removeObject( OBJ_TYPE_OF(_name) &_name)                                            \
+  {                                                                                                 \
+    using ObjType = OBJ_TYPE_OF(_name);                                                             \
+    if (removeObjectImpl<ObjType, &Manager::OBJ_REMOVED_SIGNAL(_name)>(OBJ_MAP_NAME(_name), _name)) \
+      TYP_LOG_DBG(u"Manager"_s, mediaControl_removed, ObjType, "removed:" << _name.path().path());  \
+  }
 
 // Bluez::Object types support
 namespace DBus::Bluez
@@ -28,16 +52,12 @@ namespace DBus::Bluez
     // We don't want to replace the current adapter.
     if (m_adapter)
     {
-      LOG_DBG(interface_added, "Adapter appeared:" << adapter.path());
-      LOG_DBG(interface_added, "  We currently only support 1 adapter...");
+      TYP_LOG_DBG(u"Manager"_s, interface_added, Adapter, "appeared:" << adapter.path());
+      TYP_LOG_DBG(u"Manager"_s, interface_added, Adapter, "  We currently only support 1 adapter...");
       return;
     }
 
-    LOG_DBG(adapter_added,
-            "Adapter set:"
-              << adapter.alias()
-              << adapter.address()
-            );
+    TYP_LOG_DBG(u"Manager"_s, adapter_added, Adapter, "set:" << adapter);
 
     m_adapter = &adapter;
   }
@@ -49,7 +69,7 @@ namespace DBus::Bluez
     if (!m_adapter || path != m_adapter->path())
       return;
 
-    LOG_DBG(adapter_added, "Adapter removed:" << adapter.path().path());
+    TYP_LOG_DBG(u"Manager"_s, adapter_added, Adapter, "removed:" << adapter.path().path());
 
     delete m_adapter;
     m_adapter = nullptr;
@@ -65,128 +85,13 @@ namespace DBus::Bluez
   }
 
   // Device object
-  void Manager::addObject(Device &device)
-  {
-    m_devices.insert(device.path(), &device);
-
-    LOG_DBG(device_added,
-            "Device added:"
-              << device.alias()
-              << device.address()
-              << device.connected()
-            );
-
-    emit deviceAdded(device.path(), device);
-  }
-
-  void Manager::removeObject(Device &device)
-  {
-    const Object::Path &path = device.path();
-
-    auto it = m_devices.find(path);
-    if (it == m_devices.end())
-      return;
-
-    LOG_DBG(device_removed, "Device removed:" << path.path());
-
-    emit deviceRemoved(path);
-
-    delete *it;
-    m_devices.erase(it);
-  }
-
-  bool Manager::getObject(const Object::Path &path, Device *(&device))
-  {
-    auto it = m_devices.find(path);
-
-    if (it == m_devices.end())
-      return false;
-
-    device = *it;
-    return true;
-  }
+  DEFINE_MANAGED_OBJECT(device);
 
   // MediaControl object
-  void Manager::addObject(MediaControl &controler)
-  {
-    m_mediaControls.insert(controler.path(), &controler);
+  DEFINE_MANAGED_OBJECT(mediaControl);
 
-    LOG_DBG(control_added,
-        "MediaControl added:"
-      << controler.path().path()
-      << controler.connected()
-    );
-
-    emit mediaControlAdded(controler.path(), controler);
-  }
-
-  void Manager::removeObject(MediaControl &controler)
-  {
-    const Object::Path &path = controler.path();
-
-    auto it = m_mediaControls.find(path);
-    if (it == m_mediaControls.end())
-      return;
-
-    LOG_DBG(control_removed, "MediaControl removed:" << path.path());
-
-    emit mediaControlRemoved(path);
-
-    delete *it;
-    m_mediaControls.erase(it);
-  }
-
-  bool Manager::getObject(const Object::Path &path, MediaControl *(&controler))
-  {
-    auto it = m_mediaControls.find(path);
-
-    if (it == m_mediaControls.end())
-      return false;
-
-    controler = *it;
-    return true;
-  }
-
-  // MediaControl object
-  void Manager::addObject(MediaPlayer &player)
-  {
-    m_mediaPlayers.insert(player.path(), &player);
-
-    LOG_DBG(control_added,
-        "MediaPlayer added:"
-      << (player.name().isEmpty() ? player.path().path() : player.name())
-      << player.path().path()
-    );
-
-    emit mediaPlayerAdded(player.path(), player);
-  }
-
-  void Manager::removeObject(MediaPlayer &player)
-  {
-    const Object::Path &path = player.path();
-
-    auto it = m_mediaPlayers.find(path);
-    if (it == m_mediaPlayers.end())
-      return;
-
-    LOG_DBG(control_removed, "MediaPlayer removed:" << path.path());
-
-    emit mediaPlayerRemoved(path);
-
-    it.value()->deleteLater();
-    m_mediaPlayers.erase(it);
-  }
-
-  bool Manager::getObject(const Object::Path &path, MediaPlayer *(&player))
-  {
-    auto it = m_mediaPlayers.find(path);
-
-    if (it == m_mediaPlayers.end())
-      return false;
-
-    player = *it;
-    return true;
-  }
+  // Player object
+  DEFINE_MANAGED_OBJECT(mediaPlayer);
 }
 
 // Implementation details
@@ -207,15 +112,15 @@ namespace DBus::Bluez
   {
     if (!m_bus.isConnected())
     {
-      qDebug() << "Unable to connect to system bus";
+      Log::critical(u"Manager"_s) << "Unable to connect to system bus";
       return false;
     }
 
-    LOG_DBG(initialize, "Connected to system bus");
+    LOG_DBG(u"Manager"_s, initialize, "Connected to system bus");
 
     ManagedObjectMap objects = loadManagedObjects();
 
-    LOG_DBG(initialize, "Objects:" << objects.size());
+    LOG_DBG(u"Manager"_s, initialize, "Objects:" << objects.size());
 
     for (auto it = objects.cbegin(); it != objects.cend(); ++it)
     {
@@ -226,11 +131,11 @@ namespace DBus::Bluez
     }
 
     m_bus.connect(
-      Service, RootPath, Interface::ObjectManager, Method::InterfacesAdded,
+      ServiceName, RootPath, Interface::ObjectManager, Method::InterfacesAdded,
       this, SLOT(onInterfacesAdded(QDBusObjectPath, InterfaceMap))
     );
     m_bus.connect(
-      Service, RootPath, Interface::ObjectManager, Method::InterfacesRemoved,
+      ServiceName, RootPath, Interface::ObjectManager, Method::InterfacesRemoved,
       this, SLOT(onInterfacesRemoved(QDBusObjectPath, QStringList))
     );
 
@@ -240,14 +145,14 @@ namespace DBus::Bluez
   ManagedObjectMap Manager::loadManagedObjects()
   {
     const QDBusMessage message = QDBusMessage::createMethodCall(
-      Service, RootPath, Interface::ObjectManager, Method::GetManagedObjects
+      ServiceName, RootPath, Interface::ObjectManager, Method::GetManagedObjects
     );
 
     const QDBusMessage reply = m_bus.call(message);
 
     if (reply.type() == QDBusMessage::ErrorMessage)
     {
-      qCritical() << reply.errorMessage();
+      Log::critical(u"Manager"_s) << reply.errorMessage();
       return {};
     }
 
@@ -262,14 +167,14 @@ namespace DBus::Bluez
 
   void Manager::onInterfacesAdded(const Object::Path &path, const InterfaceMap &interfaces)
   {
-    LOG_DBG(interface_added, "Added:" << path.path());
+    LOG_DBG(u"Manager"_s, interface_added, "Added:" << path.path());
 
     createObjects(path, interfaces);
   }
 
   void Manager::onInterfacesRemoved(const Object::Path &path, const QStringList &interfaces)
   {
-    LOG_DBG(interface_removed, "Removed:" << path.path());
+    LOG_DBG(u"Manager"_s, interface_removed, "Removed:" << path.path());
 
     removeObjects(path, interfaces);
   }

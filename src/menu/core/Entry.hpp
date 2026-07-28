@@ -1,6 +1,6 @@
 #pragma once
 
-#include "menu/Menu.hpp"
+#include "menu/core/Menu.hpp"
 
 #include <QGroupBox>
 

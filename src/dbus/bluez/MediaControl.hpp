@@ -30,8 +30,21 @@ namespace DBus::Bluez
     };
 
   public:
+    using Map = MediaControlMap;
+    static constexpr Name TypeName = "MediaControl";
     static constexpr Name InterfaceName = "org.bluez.MediaControl1";
 
+    template<class Stream>
+    friend Stream &operator<<(Stream &os, const MediaControl &controler)
+    {
+      os
+        << controler.path().path()
+        << controler.connected();
+      return os;
+    }
+
+
+  public:
     explicit MediaControl(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent = nullptr);
 
     bool connected() const;

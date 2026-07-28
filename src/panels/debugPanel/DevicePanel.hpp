@@ -9,10 +9,16 @@
 #include <QPushButton>
 #include <QListWidget>
 
+namespace DBus::Bluez
+{
+  class MediaPlayer;
+}
+
 class DevicePanel : public QGroupBox
 {
   Q_OBJECT
 
+  using Player = DBus::Bluez::MediaPlayer;
   using Device = DBus::Bluez::Device;
 
 public:
@@ -32,10 +38,13 @@ private slots:
 
   void selectedDeviceAliasChanged(const QString &alias);
   // void selectedDeviceRSSIChanged(const QString &alias);
+  void selectedDevicePlayerChanged(DBus::Bluez::MediaPlayer *player);
   void selectedDevicePairedChanged(bool paired);
   void selectedDeviceTrustedChanged(bool trusted);
   void selectedDeviceConnectedChanged(bool connected);
   void selectedDeviceServicesResolvedChanged(bool servicesResolved);
+
+  void onPlayerNameChange(DBus::Bluez::MediaPlayer *player);
 
 private:
   void connectDevice(Device *device);
@@ -43,6 +52,7 @@ private:
 
 private:
   Device *m_selectedDevice = nullptr;
+  Player *m_selectedPlayer = nullptr;
 
   QHash<DBus::Object::Path, QListWidgetItem *> m_items;
 
@@ -54,6 +64,7 @@ private:
   QLabel    *m_deviceName;
   QLabel    *m_deviceAddress;
   QLabel    *m_deviceRSSI;
+  QLabel    *m_devicePlayer;
   QCheckBox *m_devicePaired;
   QCheckBox *m_devicetrusted;
   QCheckBox *m_deviceConnected;

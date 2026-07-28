@@ -1,6 +1,9 @@
 #include "widgets/sizes.hpp"
 #include "DevicePanel.hpp"
 
+#include "dbus/bluez/MediaControl.hpp"
+#include "dbus/bluez/MediaPlayer.hpp"
+
 #include "dbus/bluez/Manager.hpp"
 
 #include <QHBoxLayout>
@@ -38,6 +41,12 @@ DevicePanel::DevicePanel(QWidget *parent)
     deviceRSSILayout->addWidget(new QLabel(tr("RSSI :")));
     deviceRSSILayout->addWidget(m_deviceRSSI);
 
+    QHBoxLayout *devicePlayerLayout = new QHBoxLayout();
+    m_devicePlayer = new QLabel();
+    devicePlayerLayout->setSpacing(0);
+    devicePlayerLayout->addWidget(new QLabel(tr("Player :")));
+    devicePlayerLayout->addWidget(m_devicePlayer);
+
     m_devicePaired = new QCheckBox(tr("Paired"));
     m_devicetrusted = new QCheckBox(tr("Trusted"));
     m_deviceConnected = new QCheckBox(tr("Connected"));
@@ -53,6 +62,7 @@ DevicePanel::DevicePanel(QWidget *parent)
     detailsLayout->addLayout(deviceNameLayout);
     detailsLayout->addLayout(deviceAddressLayout);
     detailsLayout->addLayout(deviceRSSILayout);
+    detailsLayout->addLayout(devicePlayerLayout);
     // detailsLayout->addWidget(new QSpacerItem(this));
     detailsLayout->addWidget(m_devicePaired);
     detailsLayout->addWidget(m_devicetrusted);
@@ -201,6 +211,15 @@ void DevicePanel::onSelectDevice(Device *device)
   if (device == m_selectedDevice)
     return;
 
+  using Manager = DBus::Bluez::Manager;
+  using MediaPlayer = DBus::Bluez::MediaPlayer;
+  using MediaControl = DBus::Bluez::MediaControl;
+
+  MediaPlayer  *playerPtr = nullptr;
+  MediaControl *controler = Manager::getObject<MediaControl>(device);
+  if (controler)
+    playerPtr = Manager::getObject<MediaPlayer>(controler->player());
+
   m_detailsPanel->setEnabled(!!device);
 
   const QString &name = (device ? device->alias() : "");
@@ -215,6 +234,7 @@ void DevicePanel::onSelectDevice(Device *device)
   m_deviceName->setText(name);
   m_deviceAddress->setText(address);
   m_deviceRSSI->setText(RSSI);
+  onPlayerNameChange(playerPtr);
 
   m_devicePaired->setChecked(paired);
   m_devicetrusted->setChecked(trusted);
@@ -238,6 +258,40 @@ void DevicePanel::selectedDeviceAliasChanged(const QString &alias)
 //void DevicePanel::selectedDeviceRSSIChanged(const QString &alias)
 //{ }
 
+void DevicePanel::selectedDevicePlayerChanged(DBus::Bluez::MediaPlayer *player)
+{
+  if (m_selectedPlayer)
+    disconnect(m_selectedPlayer, &Player::nameChanged, nullptr, nullptr);
+
+  m_selectedPlayer = player;
+
+  onPlayerNameChange(player);
+
+  if (m_selectedPlayer)
+    connect(m_selectedPlayer, &Player::nameChanged, [this]{ onPlayerNameChange(m_selectedPlayer); });
+}
+
+void DevicePanel::onPlayerNameChange(DBus::Bluez::MediaPlayer *player)
+{
+  if (!player)
+  {
+    m_devicePlayer->setText("nullptr");
+    return;
+  }
+
+  const QString &name = player->name();
+  const QString &path = player->path().path();
+
+  QString result;
+
+  result.reserve(name.size() + 2 + path.size());
+  result.append('(');
+  result.append(name);
+  result.append(')');
+  result.append(path);
+  m_devicePlayer->setText(result);
+}
+
 void DevicePanel::selectedDevicePairedChanged(bool paired)
 { m_devicePaired->setChecked(paired); }
 
@@ -256,6 +310,8 @@ void DevicePanel::connectDevice(Device *device)
   if (!device)
     return;
 
+  DBus::Bluez::MediaControl *const controler = DBus::Bluez::Manager::getObject<DBus::Bluez::MediaControl>(device);
+
   connect(
     device, &Device::aliasChanged,
     this,   &DevicePanel::selectedDeviceAliasChanged
@@ -265,6 +321,14 @@ void DevicePanel::connectDevice(Device *device)
   //  device, &Device::RSSIChanged,
   //  this,   &DevicePanel::selectedDeviceRSSIChanged
   //);
+
+  if (controler)
+  {
+    connect(
+      controler, &DBus::Bluez::MediaControl::playerChanged,
+      this,      &DevicePanel::selectedDevicePlayerChanged
+    );
+  }
 
   connect(
     device, &Device::pairedChanged,
@@ -323,6 +387,11 @@ void DevicePanel::disconnectDevice(const Device *const device)
   disconnect(m_disconnectDevice, nullptr, device, nullptr);
   disconnect(m_trustDevice,      nullptr, device, nullptr);
   disconnect(m_untrustDevice,    nullptr, device, nullptr);
+
+  disconnect(
+    nullptr, &DBus::Bluez::MediaControl::playerChanged,
+    this,    &DevicePanel::selectedDevicePlayerChanged
+  );
 
   disconnect(device, nullptr, this, nullptr);
 }

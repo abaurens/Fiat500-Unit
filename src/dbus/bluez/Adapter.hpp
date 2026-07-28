@@ -32,8 +32,20 @@ namespace DBus::Bluez
       DECL_DBUS_PROPERTY(Alias),
       DECL_DBUS_PROPERTY(Address)
     };
+
   public:
+    using Map = AdapterMap;
+    static constexpr Name TypeName = "Adapter";
     static constexpr Name InterfaceName = "org.bluez.Adapter1";
+
+    template<class Stream>
+    friend Stream &operator<<(Stream &os, const Adapter &adapter)
+    {
+      os
+        << adapter.alias()
+        << adapter.address();
+      return os;
+    }
 
   public:
     explicit Adapter(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent = nullptr);

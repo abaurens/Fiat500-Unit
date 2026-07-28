@@ -40,7 +40,19 @@ namespace DBus::Bluez
     };
 
   public:
+    using Map = DeviceMap;
+    static constexpr Name TypeName = "Device";
     inline static constexpr Name InterfaceName = "org.bluez.Device1";
+
+    template<class Stream>
+    friend Stream &operator<<(Stream &os, const Device &device)
+    {
+      os
+        << device.alias()
+        << device.address()
+        << device.connected();
+      return os;
+    }
 
   public:
     explicit Device(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent = nullptr);
@@ -69,7 +81,6 @@ namespace DBus::Bluez
     void pairedChanged(bool paired);
     void trustedChanged(bool trusted);
     void blockedChanged(bool blocked);
-    // void playerChanged(const DBus::Object::Path &path);
     void servicesResolvedChanged(bool resolved);
 
   private:

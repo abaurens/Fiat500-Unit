@@ -5,12 +5,12 @@
 #include <QPushButton>
 #include <QProgressBar>
 
-class MusicPage : public QWidget
+class MusicPanel : public QWidget
 {
   Q_OBJECT
 
 public:
-  explicit MusicPage(QWidget *parent = nullptr);
+  explicit MusicPanel(QWidget *parent = nullptr);
 
 private:
   QImage m_coverImage;

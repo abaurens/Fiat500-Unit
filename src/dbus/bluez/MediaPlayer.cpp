@@ -7,8 +7,10 @@ static constexpr uint32_t positionUpdateDelay = 1000 / positionUpdateFrequency;
 namespace DBus::Bluez
 {
   MediaPlayer::MediaPlayer(const Object::Path &path, const PropertyMap &properties, QObject *parent)
-  : Object{ InterfaceName, path, properties, parent }, m_timer(new QTimer(this))
+    : Object{ ServiceName, InterfaceName, path, properties, parent }, m_timer(new QTimer(this))
   {
+    Log::debug(u"MediaPlayer::MediaPlayer()"_s) << properties.keys();
+
     m_timer->setInterval(positionUpdateDelay);
 
     connect(
@@ -23,7 +25,12 @@ namespace DBus::Bluez
 
   MediaPlayer::MediaPlayer(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent)
     : MediaPlayer{ path, interfaces.value(InterfaceName), parent }
-  {}
+  {
+    disconnect(
+      m_timer,  &QTimer::timeout,
+      this,     &MediaPlayer::updatePosition
+    );
+  }
 
   bool MediaPlayer::repeat() const
   {
@@ -98,8 +105,6 @@ namespace DBus::Bluez
 
   void MediaPlayer::onStatusChanged(const Status status)
   {
-
-
     if (status == Status::Stopped || status == Status::Paused)
       m_timer->stop();
     else
@@ -148,7 +153,6 @@ namespace DBus::Bluez
       break;
 
     case Property::Status:
-
       onStatusChanged(Status::fromString(value.toString()));
       break;
 
@@ -169,9 +173,9 @@ namespace DBus::Bluez
       break;
 
     default:
-#ifndef NDEBUG
+     #ifndef NDEBUG
       // qDebug() << m_path.path() << ": Unhandled property " << name << "changed to" << value;
-#endif
+     #endif
       break;
     }
 

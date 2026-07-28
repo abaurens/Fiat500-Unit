@@ -1,6 +1,6 @@
 #pragma once
 
-#include "menu/Page.hpp"
+#include "menu/core/Page.hpp"
 
 #include <QWidget>
 

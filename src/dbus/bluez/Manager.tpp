@@ -1,4 +1,5 @@
 #pragma once
+#define MANAGER_TPP
 
 #include "Manager.hpp"
 

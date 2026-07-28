@@ -1,13 +1,15 @@
 #pragma once
 
+#include "core.hpp"
+
 #include <QVariantMap>
 
+#include <QStringView>
 #include <QDBusVariant>
 #include <QDBusArgument>
 #include <QDBusObjectPath>
-#include <QStringView>
 
-// #include <concepts>
+#include <QStringLiteral>
 
 using PropertyMap      = QVariantMap;
 using InterfaceMap     = QMap<QString, PropertyMap>;
@@ -66,6 +68,15 @@ namespace DBus
   {
     inline constexpr Name ObjectManager = "org.freedesktop.DBus.ObjectManager";
     inline constexpr Name Properties    = "org.freedesktop.DBus.Properties";
+  }
+
+  namespace Log
+  {
+    static auto info(const QStringView scope = u""_s)     { return ::Log::info(::Log::make_path(u"/DBus/"_s, scope));     }
+    static auto debug(const QStringView scope = u""_s)    { return ::Log::debug(::Log::make_path(u"/DBus/"_s, scope));    }
+    static auto fatal(const QStringView scope = u""_s)    { return ::Log::fatal(::Log::make_path(u"/DBus/"_s, scope));    }
+    static auto warning(const QStringView scope = u""_s)  { return ::Log::warning(::Log::make_path(u"/DBus/"_s, scope));  }
+    static auto critical(const QStringView scope = u""_s) { return ::Log::critical(::Log::make_path(u"/DBus/"_s, scope)); }
   }
 
   inline constexpr Name RootPath = "/";

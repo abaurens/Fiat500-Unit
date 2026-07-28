@@ -24,18 +24,22 @@
   )
 
 #define DECLARE_MANAGED_OBJECT(_type, _name)                                 \
-    void _name##Added(const Object::Path &path, DBus::Bluez::_type &object); \
+    void _name##Added(const Object::Path &path, DBus::Bluez::_type &_name);  \
     void _name##Removed(const Object::Path &path);                           \
+  public:                                                                    \
+    static _type::Map &_name##s() { return instance().m_##_name##s; }        \
   private:                                                                   \
-    void addObject(_type &object);                                           \
-    void removeObject(_type &object);                                        \
-    bool getObject(const Object::Path &path, _type *(&object));              \
-    _type##Map m_##_name##s
-    // inline bool getAssociatedObject(const Object &source,  _type *(&object)) \
-    // { return getObject(source.path(), object); }                             \
+    void addObject(_type &_name);                                            \
+    void removeObject(_type &_name);                                         \
+    bool getObject(const Object::Path &path, _type *(&_name))  {             \
+      return getObjectImpl(m_##_name##s, path, _name);                       \
+    }                                                                        \
+  private:                                                                   \
+    _type::Map m_##_name##s
 
 namespace DBus::Bluez
 {
+
   class Manager : public QObject
   {
     Q_OBJECT
@@ -46,9 +50,6 @@ namespace DBus::Bluez
 
     static bool initialize() { return instance().initializeInstance(); }
     static Adapter *adapter() { return instance().m_adapter; }
-    static DeviceMap &devices() { return instance().m_devices; }
-    static MediaPlayerMap &mediaPlayers() { return instance().m_mediaPlayers; }
-    static MediaControlMap &mediaControls() { return instance().m_mediaControls; }
 
     /// Return an object of type T associated with the given object
     /// (different interfaces of the same dbus object).
@@ -60,7 +61,7 @@ namespace DBus::Bluez
     /// (different interfaces of the same dbus object).
     /// Returns nullptr if no such object exists.
     template<class T>
-    static T *getObject(const Object *object) { return (object ? getObject<T>(object->path()) : nullptr); }
+    static T *getObject(const Object *object) { return (object ? getObject<T>(*object) : nullptr); }
 
     /// Return an of type T associated with the given object path
     /// Returns nullptr if no such object exists.
@@ -78,8 +79,6 @@ namespace DBus::Bluez
     void addObject(Adapter &adapter);
     void removeObject(Adapter &device);
     bool getObject(const Object::Path &path, Adapter *(&adapter));
-    // inline bool getAssociatedObject(const Object &source, Adapter *(&adapter))
-    // { return getObject(source.path(), adapter); }
 
   signals:
     DECLARE_MANAGED_OBJECT(Device,       device);
@@ -120,26 +119,69 @@ namespace DBus::Bluez
       return tryRemoveAll<BLUEZ_OBJECT_TYPELIST>(path, interfaces);
     }
 
+
     template<class ... ObjTypes>
     size_t tryCreateAll(const Object::Path &path, const InterfaceMap &interfaces);
 
     template<class ... ObjTypes>
     size_t tryRemoveAll(const Object::Path &path, const QStringList &interfaces);
 
+
     template<class ObjType>
     size_t  tryCreate(const Object::Path &path, const InterfaceMap &interfaces);
 
     template<class ObjType>
     size_t  tryRemove(const Object::Path &path, const QStringList &interfaces);
+
+
+    template<std::derived_from<Object> ObjType, void (Manager::*Signal)(const Object::Path &, ObjType &)>
+    bool addObjectImpl(typename ObjType::Map &container, ObjType &object)
+    {
+      const Object::Path &path = object.path();
+      auto it = container.find(path);
+
+      if (it != container.end())
+        removeObject(object);
+
+      container.insert(path, &object);
+
+      emit (this->*Signal)(path, object);
+      return true;
+    }
+
+    template<std::derived_from<Object> ObjType, void (Manager::*Signal)(const Object::Path &)>
+    bool removeObjectImpl(typename ObjType::Map &container, ObjType &object)
+    {
+      const Object::Path &path = object.path();
+
+      auto it = container.find(path);
+      if (it == container.end())
+        return false;
+
+      emit (this->*Signal)(path);
+
+      delete *it;
+      container.erase(it);
+      return true;
+    }
+
+    template<std::derived_from<Object> ObjType>
+    static bool getObjectImpl(typename ObjType::Map &container, const Object::Path &path, ObjType *(&object))
+    {
+      auto it = container.find(path);
+
+      if (it == container.cend())
+        return false;
+
+      object = *it;
+      return true;
+    }
+
   };
 }
 
 #include "Manager.tpp"
-
-// To remove warning from "unused" include above
-namespace {
-  static constexpr int __unused__ = DBus::Bluez::__unused__;
-}
+#undef MANAGER_TPP
 
 #undef BLUEZ_OBJECT_TYPELIST
 #undef DECLARE_MANAGED_OBJECT

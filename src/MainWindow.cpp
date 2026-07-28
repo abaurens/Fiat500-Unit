@@ -3,12 +3,12 @@
 #include "widgets/sizes.hpp"
 #include "MainWindow.hpp"
 
-#include "pages/MusicPage.hpp"
-#include "pages/SettingsPage.hpp"
+#include "panels/MusicPanel.hpp"
+#include "panels/SettingsPanel.hpp"
 
 #ifndef NO_DBUS
 # ifdef DEBUG_PANEL
-#  include "pages/debugPanel/DebugPanel.hpp"
+#  include "panels/debugPanel/DebugPanel.hpp"
 # endif
 #endif
 
@@ -16,8 +16,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
   m_sideBar = new SideBar();
 
-  m_sideBar->addPage<MusicPage>(QStringLiteral(":/icons-outline/music"));
-  m_sideBar->addPage<SettingsPage>(QStringLiteral(":/icons-outline/settings"));
+  m_sideBar->addPage<MusicPanel>(QStringLiteral(":/icons-outline/music"));
+  m_sideBar->addPage<SettingsPanel>(QStringLiteral(":/icons-outline/settings"));
 
  #ifndef NO_DBUS
  # ifdef DEBUG_PANEL
@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     m_sideBar, &SideBar::pageSelected,
     [this](int id)
     {
-      SettingsPage *settingPage = m_sideBar->getPage<SettingsPage>(id);
+      SettingsPanel *settingPage = m_sideBar->getPage<SettingsPanel>(id);
       if (settingPage)
         settingPage->resetToRoot();
     }

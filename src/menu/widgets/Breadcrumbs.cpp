@@ -1,7 +1,5 @@
 #include "Breadcrumbs.hpp"
-#include "menu/Page.hpp"
-
-// using Page = Menu::Page;
+#include "menu/core/Page.hpp"
 
 Breadcrumbs::Breadcrumbs(QWidget *parent)
   : QWidget{ parent }, m_target{ nullptr }, m_layout{ new QHBoxLayout(this) }

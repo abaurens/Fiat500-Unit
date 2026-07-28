@@ -20,8 +20,11 @@ public:
   Page &root() { return *m_root; };
   const Page &root() const { return *m_root; };
 
-  template<class T>
-  inline Page *addPage(const QString &name);
+  template<class Itm, class... Args>
+  inline Itm *addItem(Args &&... args);
+
+  template<class Pge, class... Args>
+  inline Pge *addPage(Args &&... args);
 
 signals:
   void pageChanged(Menu::Page &page);

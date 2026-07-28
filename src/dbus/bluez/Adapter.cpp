@@ -1,13 +1,15 @@
-#include "dbus/bluez/Adapter.hpp"
+#include "Adapter.hpp"
+#include "Types.hpp"
 
 namespace DBus::Bluez
 {
-  Adapter::Adapter(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent)
-    : Object{ InterfaceName, path, interfaces, parent }
-  {}
 
   Adapter::Adapter(const Object::Path &path, const PropertyMap &properties, QObject *parent)
-    : Object{ InterfaceName, path, properties, parent }
+    : Object{ ServiceName, InterfaceName, path, properties, parent }
+  {}
+
+  Adapter::Adapter(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent)
+    : Adapter{ path, interfaces.value(InterfaceName), parent }
   {}
 
   QString Adapter::address() const { return property<QString>("Address"); }

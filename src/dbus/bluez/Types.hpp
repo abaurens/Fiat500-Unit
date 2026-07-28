@@ -4,6 +4,8 @@
 
 namespace DBus::Bluez
 {
+  inline constexpr Name ServiceName = "org.bluez";
+
   inline QString firstOr(const QStringList &list, const QString &def = "")
   { return list.isEmpty() ? def : list.constFirst(); }
 
@@ -25,4 +27,14 @@ namespace DBus::Bluez
       // qDebug() << "Track Infos:" << properties;
     }
   };
+
+  namespace Log
+  {
+    static auto info(const QStringView scope = u""_s)     { return ::DBus::Log::info(::Log::make_path(u"/BlueZ/"_s, scope));     }
+    static auto debug(const QStringView scope = u""_s)    { return ::DBus::Log::debug(::Log::make_path(u"/BlueZ/"_s, scope));    }
+    static auto fatal(const QStringView scope = u""_s)    { return ::DBus::Log::fatal(::Log::make_path(u"/BlueZ/"_s, scope));    }
+    static auto warning(const QStringView scope = u""_s)  { return ::DBus::Log::warning(::Log::make_path(u"/BlueZ/"_s, scope));  }
+    static auto critical(const QStringView scope = u""_s) { return ::DBus::Log::critical(::Log::make_path(u"/BlueZ/"_s, scope)); }
+  }
+
 }

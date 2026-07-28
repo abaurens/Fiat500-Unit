@@ -90,7 +90,22 @@ namespace DBus::Bluez
     };
 
   public:
+    using Map = MediaPlayerMap;
+    static constexpr Name TypeName = "MediaPlayer";
     static constexpr Name InterfaceName = "org.bluez.MediaPlayer1";
+
+    template<class Stream>
+    friend Stream &operator<<(Stream &os, const MediaPlayer &player)
+    {
+      os.noquote().nospace();
+
+      os << player.path().path();
+
+      if (!player.name().isEmpty())
+        os << " (" << player.name() << ')';
+
+      return os;
+    }
 
   public:
     explicit MediaPlayer(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent = nullptr);

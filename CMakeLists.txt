@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.16)
 project(Fiat500-Unit  VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_AUTORCC ON)
+set(CMAKE_C_STANDARD C11)
 set(CMAKE_CXX_STANDARD 20)
+#set(CMAKE_C_STANDARD_REQUIRED ON)
+#set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 option(
@@ -36,6 +40,7 @@ qt_add_executable(Fiat500-Unit
 
     resources.qrc
 
+    src/core.hpp
     src/main.cpp
 
     src/Ref.hpp
@@ -62,18 +67,32 @@ qt_add_executable(Fiat500-Unit
     src/widgets/sizes.hpp
     src/widgets/SideBar.hpp src/widgets/SideBar.cpp
 
-    # Main pages
-    src/pages/MusicPage.hpp src/pages/MusicPage.cpp
-    src/pages/SettingsPage.hpp src/pages/SettingsPage.cpp
+    # Main panels
+    src/panels/MusicPanel.hpp src/panels/MusicPanel.cpp
+    src/panels/SettingsPanel.hpp src/panels/SettingsPanel.cpp
 
     # Menu system
-    src/menu/Entry.hpp src/menu/Entry.cpp
-    src/menu/Item.hpp src/menu/Item.cpp
-    src/menu/Page.hpp src/menu/Page.cpp
-    src/menu/Menu.hpp src/menu/Menu.cpp
+    src/menu/core/Entry.hpp src/menu/core/Entry.cpp
+    src/menu/core/Item.hpp  src/menu/core/Item.cpp
+    src/menu/core/Menu.hpp  src/menu/core/Menu.cpp
+    src/menu/core/Page.hpp  src/menu/core/Page.cpp src/menu/core/Page.tpp
 
     src/menu/widgets/Navigator.hpp src/menu/widgets/Navigator.cpp
     src/menu/widgets/Breadcrumbs.hpp src/menu/widgets/Breadcrumbs.cpp
+
+    src/menu/widgets/ButtonItem.hpp src/menu/widgets/ButtonItem.cpp
+    src/menu/widgets/ActionItem.hpp src/menu/widgets/ActionItem.cpp
+
+    src/menu/SystemPage.hpp src/menu/SystemPage.cpp
+
+    # Audio stack
+    src/audio/Sink.hpp
+    src/audio/Source.hpp
+    src/audio/Backend.hpp
+    src/audio/Manager.hpp src/audio/Manager.cpp
+
+    src/audio/backend/pipewire/Backend.hpp src/audio/backend/pipewire/Backend.cpp
+
 )
 
 qt_add_translations(
@@ -102,18 +121,22 @@ endif()
 # Add Windows specific sources
 if (WIN32)
     set(NO_FULLSCREEN ON)
-
     target_sources(Fiat500-Unit PUBLIC)
-
     target_link_libraries(Fiat500-Unit PRIVATE user32)
+    target_compile_definitions(Fiat500-Unit PRIVATE "NO_DBUS")
+elseif(UNIX AND NOT MACOS)
+    target_sources(Fiat500-Unit PUBLIC )
 
-    target_compile_definitions(Fiat500-Unit
-        PRIVATE
-        "NO_DBUS"
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(PIPEWIRE REQUIRED IMPORTED_TARGET libpipewire-0.3)
+
+    target_link_libraries(Fiat500-Unit PRIVATE
+        PkgConfig::PIPEWIRE
     )
 
-elseif(UNIX AND NOT MACOS)
-    target_sources(Fiat500-Unit PUBLIC
+    target_compile_definitions(Fiat500-Unit PRIVATE
+        _REENTRANT
+        HAVE_PIPEWIRE
     )
 endif()
 
@@ -122,10 +145,10 @@ if (DEBUG_PANEL)
     target_compile_definitions(Fiat500-Unit PRIVATE "DEBUG_PANEL")
 
     target_sources(Fiat500-Unit PUBLIC
-        src/pages/debugPanel/DebugPanel.hpp src/pages/debugPanel/DebugPanel.cpp
-        src/pages/debugPanel/MediaPanel.hpp src/pages/debugPanel/MediaPanel.cpp
-        src/pages/debugPanel/DevicePanel.hpp src/pages/debugPanel/DevicePanel.cpp
-        src/pages/debugPanel/AdapterPanel.hpp src/pages/debugPanel/AdapterPanel.cpp
+        src/panels/debugPanel/DebugPanel.hpp src/panels/debugPanel/DebugPanel.cpp
+        src/panels/debugPanel/MediaPanel.hpp src/panels/debugPanel/MediaPanel.cpp
+        src/panels/debugPanel/DevicePanel.hpp src/panels/debugPanel/DevicePanel.cpp
+        src/panels/debugPanel/AdapterPanel.hpp src/panels/debugPanel/AdapterPanel.cpp
     )
 endif()
 

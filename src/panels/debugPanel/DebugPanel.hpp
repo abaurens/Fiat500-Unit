@@ -1,8 +1,8 @@
 #pragma once
 
-#include "pages/debugPanel/AdapterPanel.hpp"
-#include "pages/debugPanel/DevicePanel.hpp"
-#include "pages/debugPanel/MediaPanel.hpp"
+#include "panels/debugPanel/AdapterPanel.hpp"
+#include "panels/debugPanel/DevicePanel.hpp"
+#include "panels/debugPanel/MediaPanel.hpp"
 
 #include <QMainWindow>
 

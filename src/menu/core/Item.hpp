@@ -1,7 +1,7 @@
 #pragma once
 
-#include "menu/Menu.hpp"
-#include "menu/Entry.hpp"
+#include "menu/core/Menu.hpp"
+#include "menu/core/Entry.hpp"
 
 #include <QHBoxLayout>
 

@@ -1,10 +1,11 @@
 #include "MediaControl.hpp"
 #include "Manager.hpp"
+#include "Types.hpp"
 
 namespace DBus::Bluez
 {
   MediaControl::MediaControl(const Object::Path &path, const PropertyMap &properties, QObject *parent)
-    : Object{ InterfaceName, path, properties, parent }
+    : Object{ ServiceName, InterfaceName, path, properties, parent }
   {
     connect(
       &Manager::instance(), &Manager::mediaPlayerRemoved,
@@ -29,8 +30,6 @@ namespace DBus::Bluez
         }
       }
     );
-
-    qDebug() << "Media Control created with initial player:" << player().path();
   }
 
   MediaControl::MediaControl(const Object::Path &path, const InterfaceMap &interfaces, QObject *parent)
@@ -69,9 +68,12 @@ namespace DBus::Bluez
 
   void MediaControl::onPlayerChange(const Object::Path &playerPath)
   {
-    qDebug() << "MediaControl.player changed to" << playerPath;
-
     MediaPlayer *const player = Manager::mediaPlayers().value(playerPath, nullptr);
+
+    if (player != nullptr)
+      Log::debug(u"MediaControl"_s)<< "player changed to" << *player;
+    else
+      Log::debug(u"MediaControl"_s)<< "player changed to" << nullptr;
 
     emit playerChanged(player);
   }
@@ -82,7 +84,6 @@ namespace DBus::Bluez
 
     switch (property)
     {
-
     case Property::Connected:
       emit connectedChanged(value.toBool());
       break;
@@ -92,9 +93,9 @@ namespace DBus::Bluez
       break;
 
     default:
-#ifndef NDEBUG
-      // qDebug() << m_path.path() << ": Unhandled property " << name << "changed to" << value;
-#endif
+     #ifndef NDEBUG
+      // debug() << m_path.path() << ": Unhandled property " << name << "changed to" << value;
+     #endif
       break;
     }
   }

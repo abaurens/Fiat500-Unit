@@ -1,4 +1,4 @@
-#include "MusicPage.hpp"
+#include "MusicPanel.hpp"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -9,7 +9,7 @@ static constexpr int g_albumFontSize = 18;
 
 static constexpr QSize g_albumCoverSize { 400, 400 };
 
-MusicPage::MusicPage(QWidget *parent) : QWidget(parent)
+MusicPanel::MusicPanel(QWidget *parent) : QWidget(parent)
 {
   /**************************\
   |*    Widgets creation    *|

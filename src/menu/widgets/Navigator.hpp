@@ -1,7 +1,7 @@
 #pragma once
 
 #include "menu/widgets/Breadcrumbs.hpp"
-#include "menu/Menu.hpp"
+#include "menu/core/Menu.hpp"
 
 #include <QVBoxLayout>
 
