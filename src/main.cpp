@@ -1,6 +1,8 @@
 #include "dbus/bluez/Manager.hpp"
 #include "dbus/Types.hpp"
 
+#include "audio/Manager.hpp"
+
 #include "MainWindow.hpp"
 
 #include <QCommandLineParser>
@@ -66,6 +68,9 @@ int main(int argc, char *argv[])
   registerDBusTypes();
   DBus::Bluez::Manager::initialize();
  #endif
+
+  Audio::Manager::initialize();
+  Audio::Manager::backend().run();
 
   MainWindow window;
 

@@ -1,9 +1,13 @@
 #pragma once
 #include <spa/utils/hook.h>
 
+#include "Scope.hpp"
+
+#include "audio/backend/pipewire/Object.hpp"
 #include "audio/Backend.hpp"
 
 #include <thread>
+#include <unordered_map>
 
 struct pw_core;
 struct pw_context;
@@ -19,13 +23,14 @@ namespace Audio::PipeWire
     Backend();
     ~Backend() override;
 
-    void run();
+    virtual void run() override;
 
     /// TODO:
     ///  - Discover registry
     ///  - Enumerate sinks
     ///  - Enumerate sources
     ///  - Subscribe to hotplug events
+
   private:
     static void onGlobalRemove(void *data, uint32_t id);
     static void onGlobal(void *data, uint32_t id, uint32_t permissions, const char *type, uint32_t version, const struct spa_dict *props);
@@ -39,6 +44,8 @@ namespace Audio::PipeWire
     spa_hook      m_registryListener;
 
     std::thread   m_thread;
+
+    std::unordered_map<uint32_t, Scope<Object>> m_objects;
   };
 
 }

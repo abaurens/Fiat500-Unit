@@ -1,5 +1,6 @@
 #include "Manager.hpp"
 #include "Types.hpp"
+#include "Log.hpp"
 
 #include <QDBusMessage>
 

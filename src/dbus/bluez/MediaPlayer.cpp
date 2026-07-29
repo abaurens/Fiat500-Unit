@@ -1,5 +1,5 @@
 #include "MediaPlayer.hpp"
-
+#include "dbus/bluez/Log.hpp"
 
 static constexpr uint32_t positionUpdateFrequency = 2; // force updates position 2 times per seconds
 static constexpr uint32_t positionUpdateDelay = 1000 / positionUpdateFrequency;

@@ -14,6 +14,8 @@ namespace Audio
   public:
     virtual ~Backend() = default;
 
+    virtual void run() = 0;
+
     //virtual QList<Sink*> sinks() = 0;
     //virtual QList<Source*> sources() = 0;
   };

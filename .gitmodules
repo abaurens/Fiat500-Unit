@@ -1,0 +1,3 @@
+[submodule "libs/frozen"]
+	path = libs/frozen
+	url = git@github.com:serge-sans-paille/frozen.git

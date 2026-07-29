@@ -1,6 +1,7 @@
 #pragma once
 
 #include "dbus/Types.hpp"
+#include "dbus/Log.hpp"
 
 #include <QObject>
 #include <QDBusMessage>

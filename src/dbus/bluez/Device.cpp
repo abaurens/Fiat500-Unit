@@ -1,5 +1,6 @@
 #include "Device.hpp"
 #include "Types.hpp"
+#include "Log.hpp"
 
 #include <QDBusConnection>
 

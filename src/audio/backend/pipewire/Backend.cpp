@@ -4,6 +4,8 @@
 #include <pipewire/core.h>
 
 #include "audio/backend/pipewire/Backend.hpp"
+#include "audio/backend/pipewire/Object.hpp"
+#include "audio/backend/pipewire/Log.hpp"
 
 #include <QDebug>
 
@@ -22,27 +24,54 @@ namespace Audio
 namespace Audio::PipeWire
 {
 
+  static QString dictToString(const spa_dict *dict)
+  {
+    if (!dict)
+      return {};
+
+    QString result;
+
+    const spa_dict_item *item;
+
+    spa_dict_for_each(item, dict)
+    {
+      result += QString("  %1 = %2\n")
+        .arg(item->key)
+        .arg(item->value);
+    }
+
+    return result;
+  }
+
   void Backend::onGlobalRemove(void *vdata, uint32_t id)
   {
-    Q_UNUSED(vdata)
+    Backend *backend = static_cast<Backend *>(vdata);
 
-    qDebug()
-      << "Removed:"
-      << id;
+    auto it = backend->m_objects.find(id);
+    if (it == backend->m_objects.cend())
+      return;
+
+    backend->m_objects.erase(it);
+    //Log::debug(u"Backend"_s) << "Object removed:" << id;
   }
 
   void Backend::onGlobal(void *vdata, uint32_t id, uint32_t perms, const char *type, uint32_t vers, const struct spa_dict *props)
   {
-    Q_UNUSED(vdata)
+    Backend *backend = static_cast<Backend *>(vdata);
+
     Q_UNUSED(perms)
     Q_UNUSED(vers)
 
-    qDebug().nospace() << "PipeWire object: [" << id << "] " << type;
+    //Log::debug(u"Backend"_s).nospace().noquote()
+    //  << "Object created: [" << id << "] " << type
+    //  << '\n' << dictToString(props);
+
+    backend->m_objects.emplace(id, make_scope<Object>(id, props));
   }
 
   Backend::Backend() : m_registry{}
   {
-    constexpr pw_registry_events registryEvents =
+    static const pw_registry_events registryEvents =
     {
       .version       = PW_VERSION_REGISTRY_EVENTS,
       .global        = &Backend::onGlobal,
@@ -90,11 +119,18 @@ namespace Audio::PipeWire
       this
     );
 
-    qDebug() << "Connected to PipeWire";
+    Log::debug(u"PipeWire/Backend"_s) << "Connected to PipeWire";
   }
 
   Backend::~Backend()
   {
+    pw_main_loop_quit(m_loop);
+
+    if (m_thread.joinable())
+      m_thread.join();
+
+    Log::debug(u"PipeWire/Backend"_s) << "Main loop stopped";
+
     if (m_core)
       pw_core_disconnect(m_core);
 
@@ -107,9 +143,7 @@ namespace Audio::PipeWire
 
   void Backend::run()
   {
+    Log::debug(u"PipeWire/Backend"_s) << "Starting main loop";
     m_thread = std::thread([this] { pw_main_loop_run(m_loop); });
-
-    if (m_thread.joinable())
-      m_thread.join();
   }
 }

@@ -40,9 +40,9 @@ qt_add_executable(Fiat500-Unit
 
     resources.qrc
 
-    src/core.hpp
     src/main.cpp
 
+    src/Log.hpp
     src/Ref.hpp
     src/Scope.hpp
     src/MainWindow.cpp
@@ -52,9 +52,11 @@ qt_add_executable(Fiat500-Unit
     src/settings/Setting.hpp
 
     # DBus & Bluez API
+    src/dbus/Log.hpp
     src/dbus/Types.hpp src/dbus/Types.cpp
     src/dbus/Object.hpp src/dbus/Object.cpp
 
+    src/dbus/bluez/Log.hpp
     src/dbus/bluez/Types.hpp
 
     src/dbus/bluez/Device.hpp src/dbus/bluez/Device.cpp
@@ -86,13 +88,16 @@ qt_add_executable(Fiat500-Unit
     src/menu/SystemPage.hpp src/menu/SystemPage.cpp
 
     # Audio stack
+    src/audio/Log.hpp
     src/audio/Sink.hpp
     src/audio/Source.hpp
     src/audio/Backend.hpp
     src/audio/Manager.hpp src/audio/Manager.cpp
 
+    src/audio/backend/pipewire/Log.hpp
+    src/audio/backend/pipewire/Object.hpp src/audio/backend/pipewire/Object.cpp
     src/audio/backend/pipewire/Backend.hpp src/audio/backend/pipewire/Backend.cpp
-
+    src/Enum.hpp
 )
 
 qt_add_translations(
@@ -104,6 +109,7 @@ qt_add_translations(
 target_include_directories(Fiat500-Unit PRIVATE
     src
     include
+    libs/frozen/include
 )
 
 target_link_libraries(Fiat500-Unit PRIVATE
