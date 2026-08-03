@@ -15,6 +15,7 @@ public:
 
 private:
 
+
 private:
   SideBar *m_sideBar;
 };

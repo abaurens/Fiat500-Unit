@@ -55,18 +55,31 @@ namespace Audio::PipeWire
     //Log::debug(u"Backend"_s) << "Object removed:" << id;
   }
 
-  void Backend::onGlobal(void *vdata, uint32_t id, uint32_t perms, const char *type, uint32_t vers, const struct spa_dict *props)
+  void Backend::onGlobal(void *vdata, uint32_t id, uint32_t perms, const char *ctype, uint32_t vers, const struct spa_dict *props)
   {
+    constexpr std::string_view InterfacePrefix = "PipeWire:Interface:";
+
     Backend *backend = static_cast<Backend *>(vdata);
 
     Q_UNUSED(perms)
     Q_UNUSED(vers)
 
+    std::string_view type(ctype);
+
+    if (!type.starts_with(InterfacePrefix))
+    {
+      /// non-interface types are not supported
+      return;
+    }
+    type = type.substr(InterfacePrefix.size());
+
+    Object::Type otype = Object::Type::FromName(type);
+
     //Log::debug(u"Backend"_s).nospace().noquote()
-    //  << "Object created: [" << id << "] " << type
+    //  << "Object created: [" << id << "] " << otype.name()
     //  << '\n' << dictToString(props);
 
-    backend->m_objects.emplace(id, make_scope<Object>(id, props));
+    backend->m_objects.emplace(id, make_scope<Object>(id, otype, props));
   }
 
   Backend::Backend() : m_registry{}

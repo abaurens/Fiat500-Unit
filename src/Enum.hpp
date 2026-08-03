@@ -25,7 +25,7 @@ namespace Enums
 {
   using Name = std::string_view;
 
-  template<class Enum, class T>
+  template<class Enum, std::enumeration T>
   struct Value
   {
   public:
@@ -33,19 +33,30 @@ namespace Enums
       : m_val{v}, m_name{n}
     {}
 
+    static constexpr size_t hash(Value v, size_t seed) {
+      return v.hash(seed);
+    }
+
     constexpr Name name() const { return m_name; }
 
     template<std::integral Ret>
     constexpr Ret valueAs() const { return static_cast<Ret>(m_val); }
 
+    constexpr size_t value() const { return static_cast<size_t>(m_val); }
+
     template<std::integral Ret>
     constexpr explicit operator Ret() const { return static_cast<Ret>(m_val); }
+
+    constexpr operator size_t() const { return static_cast<size_t>(m_val); }
 
     constexpr auto operator<=>(Value other) const {
       return m_val <=> other.m_val;
     }
     constexpr bool operator==(Value other) const {
       return m_val == other.m_val;
+    }
+    constexpr size_t hash(size_t seed) const {
+      return seed ^ static_cast<size_t>(m_val);
     }
 
   private:
@@ -82,72 +93,84 @@ namespace Enums
 #define _enm_NAME_TO_ENUM(name) { #name, Values::name },
 #define _enm_ENUM_DECLARE(name) inline static constexpr Value name{ Values::name, #name };
 
-#define MAKE_ENUM(_name, ...)                           \
-struct _name                                            \
-{                                                       \
-private:                                                \
-  using Self = _name;                                   \
-  using Name = std::string_view;                        \
-  enum class Values : size_t                            \
-  {                                                     \
-    __VA_ARGS__,                                        \
-    Unknown = std::numeric_limits<size_t>::max()        \
-  };                                                    \
-  static inline constexpr size_t Count =                \
-  Enums::ArgCount(                                      \
-    _enm_FOR_EACH_ARGS(_enm_ENUM_VALUE, __VA_ARGS__) 0  \
-  ) - 1;                                                \
-  using Value = Enums::Value<_name, Values>;            \
-  using Names = std::array<Name, Count>;                \
-  using Parser = Enums::FromNameMap<Values, Count>;     \
-  static inline constexpr Names s_names = {             \
-    _enm_FOR_EACH_ARGS(_enm_ENUM_NAME, __VA_ARGS__)     \
-  };                                                    \
-  static inline constexpr Parser s_parser = {           \
-    _enm_FOR_EACH_ARGS(_enm_NAME_TO_ENUM, __VA_ARGS__)  \
-  };                                                    \
-public:                                                 \
-  _enm_ENUM_DECLARE(Unknown)                            \
-  static constexpr size_t count() { return Count; }     \
-  static constexpr Names names() { return s_names; }    \
-  static constexpr _name FromName(const Name name) {    \
-    if (s_parser.contains(name))                        \
-      return Value{ Type::s_parser.at(name), name };    \
-    return _name::Unknown;                              \
-  }                                                     \
-  constexpr _name(Value v) : m_data{ v } {}             \
-  constexpr operator Value() const { return m_data; }   \
-  template<std::integral T>                             \
-  constexpr explicit operator T() const {               \
-    return static_cast<T>(m_data);                      \
-  }                                                     \
-  constexpr Name name() const { return m_data.name(); } \
-  template<std::integral Ret>                           \
-  constexpr Ret valueAs() const {                       \
-    return m_data.valueAs<Ret>();                       \
-  }                                                     \
-  template<std::integral T>                             \
-  constexpr auto operator<=>(T ov) const {              \
-    return m_data.m_val <=> ov;                         \
-  }                                                     \
-  template<std::integral T>                             \
-  constexpr bool operator==(T ov) const {               \
-    return m_data.m_val == ov;                          \
-  }                                                     \
-  constexpr auto operator<=>(Value other) const {       \
-    return m_data <=> other;                            \
-  }                                                     \
-  constexpr bool operator==(Value other) const {        \
-    return m_data == other;                             \
-  }                                                     \
-  constexpr auto operator<=>(Self other) const {        \
-    return m_data <=> other.m_data;                     \
-  }                                                     \
-  constexpr bool operator==(Self other) const {         \
-    return m_data == other.m_data;                      \
-  }                                                     \
-public:                                                 \
-  _enm_FOR_EACH_ARGS(_enm_ENUM_DECLARE, __VA_ARGS__)    \
-private:                                                \
-  Value m_data;                                         \
+#define MAKE_ENUM(_name, ...)                              \
+struct _name                                               \
+{                                                          \
+private:                                                   \
+  using Self = _name;                                      \
+  using Name = std::string_view;                           \
+  enum class Values : size_t                               \
+  {                                                        \
+    __VA_ARGS__,                                           \
+    Unknown = std::numeric_limits<size_t>::max()           \
+  };                                                       \
+  static inline constexpr size_t Count =                   \
+  Enums::ArgCount(                                         \
+    _enm_FOR_EACH_ARGS(_enm_ENUM_VALUE, __VA_ARGS__) 0     \
+  ) - 1;                                                   \
+  using Value = Enums::Value<_name, Values>;               \
+  using Names = std::array<Name, Count>;                   \
+  using Parser = Enums::FromNameMap<Values, Count>;        \
+  static inline constexpr Names s_names = {                \
+    _enm_FOR_EACH_ARGS(_enm_ENUM_NAME, __VA_ARGS__)        \
+  };                                                       \
+  static inline constexpr Parser s_parser = {              \
+    _enm_FOR_EACH_ARGS(_enm_NAME_TO_ENUM, __VA_ARGS__)     \
+  };                                                       \
+public:                                                    \
+  _enm_ENUM_DECLARE(Unknown)                               \
+  static constexpr size_t count() { return Count; }        \
+  static constexpr Names names() { return s_names; }       \
+  static constexpr _name FromName(const Name name) {       \
+    if (s_parser.contains(name))                           \
+      return Value{ _name::s_parser.at(name), name };      \
+    return _name::Unknown;                                 \
+  }                                                        \
+  static constexpr size_t hash(_name value, size_t seed) { \
+    return hash(value, seed);                              \
+  }                                                        \
+  static constexpr size_t hash(Value value, size_t seed) { \
+    return Value::hash(value, seed);                       \
+  }                                                        \
+  constexpr _name(Value v) : m_data{ v } {}                \
+  constexpr operator Value() const { return m_data; }      \
+  template<std::integral T>                                \
+  constexpr explicit operator T() const {                  \
+    return static_cast<T>(m_data);                         \
+  }                                                        \
+  constexpr Name name() const { return m_data.name(); }    \
+  template<std::integral Ret>                              \
+  constexpr Ret valueAs() const {                          \
+    return m_data.valueAs<Ret>();                          \
+  }                                                        \
+  constexpr size_t value() const {                         \
+      return m_data.value();                               \
+  }                                                        \
+  constexpr size_t hash(size_t seed) const {               \
+    return Value::hash(m_data, seed);                      \
+  }                                                        \
+  template<std::integral T>                                \
+  constexpr auto operator<=>(T ov) const {                 \
+    return m_data.m_val <=> ov;                            \
+  }                                                        \
+  template<std::integral T>                                \
+  constexpr bool operator==(T ov) const {                  \
+    return m_data.m_val == ov;                             \
+  }                                                        \
+  constexpr auto operator<=>(Value other) const {          \
+    return m_data <=> other;                               \
+  }                                                        \
+  constexpr bool operator==(Value other) const {           \
+    return m_data == other;                                \
+  }                                                        \
+  constexpr auto operator<=>(Self other) const {           \
+    return m_data <=> other.m_data;                        \
+  }                                                        \
+  constexpr bool operator==(Self other) const {            \
+    return m_data == other.m_data;                         \
+  }                                                        \
+public:                                                    \
+  _enm_FOR_EACH_ARGS(_enm_ENUM_DECLARE, __VA_ARGS__)       \
+private:                                                   \
+  Value m_data;                                            \
 }

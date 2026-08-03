@@ -34,14 +34,23 @@ namespace Audio::PipeWire
     );
 
   public:
-    Object(uint32_t id);
-    Object(uint32_t id, const spa_dict *props);
+    Object(uint32_t id, Type type, const spa_dict *props = nullptr);
 
     ~Object();
 
     uint32_t id() const { return m_id; }
 
     QString property(const QString& key) const;
+
+    template<class OS>
+    friend OS &operator<<(OS &&os, const Object &obj)
+    {
+      std::stringstream ss;
+
+      ss << obj.m_type.name() << " (" << obj.m_id << ")";
+      os << ss.str();
+      return os;
+    }
 
   protected:
     virtual void onPropertyChanged(const QString &name, const QString &newValue, [[maybe_unused]] const QString &oldValue)

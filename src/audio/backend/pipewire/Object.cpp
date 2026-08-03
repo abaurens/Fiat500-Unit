@@ -6,14 +6,14 @@
 namespace Audio::PipeWire
 {
 
-  Object::Object(uint32_t id, const spa_dict *props) : m_type{ Type::Core }, m_id{ id }
+  Object::Object(uint32_t id, Type type, const spa_dict *props) : m_type{ type }, m_id{ id }
   {
     if (!props)
       return;
 
     const spa_dict_item *item;
 
-    Log::debug(u"Object"_s) << m_id << "created with properties:";
+    Log::debug(u"Object"_s).noquote() << *this << "created with properties:";
     spa_dict_for_each(item, props)
     {
       qDebug().nospace().noquote() << "  [" << item->key << "] = \"" << item->value << "\"";
@@ -21,12 +21,9 @@ namespace Audio::PipeWire
     }
   }
 
-  Object::Object(uint32_t id) : Object(id, nullptr)
-  {}
-
   Object::~Object()
   {
-    Log::debug(u"Object"_s) << m_id << "removed:" ;
+    Log::debug(u"Object"_s).noquote() << *this << "removed.";
   }
 
   bool Object::updateProperty(const QString &name, const QString &newValue)
