@@ -48,15 +48,16 @@ qt_add_executable(${PROJECT_NAME}
 
     resources.qrc
 
-    src/main.cpp
-
     src/Log.hpp
     src/Ref.hpp
     src/Enum.hpp
     src/Scope.hpp
+    src/AbstractManager.hpp
 
-    src/MainWindow.cpp
-    src/MainWindow.hpp
+    src/main.cpp
+
+    src/App.hpp src/App.cpp
+    src/MainWindow.hpp src/MainWindow.cpp
 
     # Settings system
     src/settings/Setting.hpp
@@ -105,9 +106,13 @@ qt_add_executable(${PROJECT_NAME}
     src/audio/Manager.hpp src/audio/Manager.cpp
 
     src/audio/backend/pipewire/Log.hpp
+    src/audio/backend/pipewire/Node.hpp src/audio/backend/pipewire/Node.cpp
+    src/audio/backend/pipewire/Port.hpp src/audio/backend/pipewire/Port.cpp
+    src/audio/backend/pipewire/Device.hpp src/audio/backend/pipewire/Device.cpp
+    src/audio/backend/pipewire/Client.hpp src/audio/backend/pipewire/Client.cpp
     src/audio/backend/pipewire/Object.hpp src/audio/backend/pipewire/Object.cpp
     src/audio/backend/pipewire/Backend.hpp src/audio/backend/pipewire/Backend.cpp
-    src/App.hpp src/App.cpp
+    src/CaseInsensitiveCharTrait.hpp
 )
 
 qt_add_translations(

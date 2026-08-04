@@ -1,5 +1,7 @@
 #pragma once
 
+#include "AbstractManager.hpp"
+
 #include "dbus/Types.hpp"
 
 #include "dbus/bluez/Adapter.hpp"
@@ -40,15 +42,15 @@
 namespace DBus::Bluez
 {
 
-  class Manager : public QObject
+  class Manager : public QObject, public ManagerType
   {
     Q_OBJECT
 
+    MANAGER_OBJECT
+
+
   // Public static APi
   public:
-    static Manager &instance();
-
-    static bool initialize() { return instance().initializeInstance(); }
     static Adapter *adapter() { return instance().m_adapter; }
 
     /// Return an object of type T associated with the given object
@@ -98,7 +100,7 @@ namespace DBus::Bluez
 
   // private constructor (singleton)
   private:
-    explicit Manager(QObject *parent = nullptr);
+    // explicit Manager(QObject *parent = nullptr);
 
   private slots:
     void onInterfacesAdded(const QDBusObjectPath &path, const InterfaceMap &interfaces);
@@ -106,7 +108,7 @@ namespace DBus::Bluez
 
   // Init functions
   private:
-    bool initializeInstance();
+    // bool initializeInstance();
     ManagedObjectMap loadManagedObjects();
 
   // Automatic dynamic object creation system

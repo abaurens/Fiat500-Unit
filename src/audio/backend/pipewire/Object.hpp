@@ -19,7 +19,7 @@ namespace Audio::PipeWire
   {
     friend class Backend;
 
-  protected:
+  public:
     MAKE_ENUM(Type,
       Core,
       Module,
@@ -34,13 +34,17 @@ namespace Audio::PipeWire
     );
 
   public:
-    Object(uint32_t id, Type type, const spa_dict *props = nullptr);
+    Object(uint32_t id, Type type, const spa_dict *props = nullptr, const bool log = false);
 
-    ~Object();
+    virtual ~Object();
 
     uint32_t id() const { return m_id; }
 
+    std::optional<QString> tryProperty(const QString &name) const;
     QString property(const QString& key) const;
+    QString propertyOr(const QString &name, const QString &defaultValue) const;
+    QString propertyOr(const QString &name, QString &&defaultValue) const;
+
 
     template<class OS>
     friend OS &operator<<(OS &&os, const Object &obj)

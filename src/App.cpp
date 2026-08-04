@@ -26,15 +26,15 @@ struct commandDefinition
 
 constexpr frozen::unordered_map<size_t, commandDefinition, Command::count()> g_commands = {
   {
-    Command::opt_no_fullscreen, commandDefinition{ QChar{ 0 }, "no-fullscreen", "Disable fullscreen launch (useful when testing on a PC)" }
+   Command::opt_no_fullscreen.value(), commandDefinition{ QChar{ 0 }, "no-fullscreen", "Disable fullscreen launch (useful when testing on a PC)" }
   }
 };
 
 bool g_flags[Command::count()] = { false };
 
-
-App::App(int &ac, char **av, int flags) : QApplication{ac, av, flags}
+App::App(int &ac, char **av, int flags) : QApplication{ ac, av, flags }
 {
+
   parseArgs();
 
   loadTranslations();
@@ -42,6 +42,11 @@ App::App(int &ac, char **av, int flags) : QApplication{ac, av, flags}
   setupDBus();
 
   setupPipewire();
+}
+
+App::~App()
+{
+
 }
 
 void App::parseArgs()
@@ -103,7 +108,7 @@ int App::run()
 {
   MainWindow window;
 
-  if (FULLSCREEN_ALLOWED && !g_flags[Command::opt_no_fullscreen])
+  if (FULLSCREEN_ALLOWED && !g_flags[Command::opt_no_fullscreen.value()])
   {
     window.showFullScreen();
   }

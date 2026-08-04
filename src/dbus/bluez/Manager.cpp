@@ -98,15 +98,7 @@ namespace DBus::Bluez
 // Implementation details
 namespace DBus::Bluez
 {
-  Manager &Manager::instance()
-  {
-    static Manager g_manager;
-
-    return g_manager;
-  }
-
-  Manager::Manager(QObject *parent)
-    : QObject{ parent }, m_bus(QDBusConnection::systemBus())
+  Manager::Manager(QObject *owner) : ManagerType { owner }, m_bus{ QDBusConnection::systemBus() }
   {}
 
   bool Manager::initializeInstance()
@@ -141,6 +133,21 @@ namespace DBus::Bluez
     );
 
     return true;
+  }
+
+  void Manager::deinitializeInstance()
+  {
+    Log::debug(u"Manager"_s) << "Deinitializing";
+
+    m_bus.disconnect(
+      ServiceName, RootPath, Interface::ObjectManager, Method::InterfacesRemoved,
+      this, SLOT(onInterfacesRemoved(QDBusObjectPath, QStringList))
+    );
+    m_bus.disconnect(
+      ServiceName, RootPath, Interface::ObjectManager, Method::InterfacesAdded,
+      this, SLOT(onInterfacesAdded(QDBusObjectPath, InterfaceMap))
+    ),
+    m_adapter = nullptr;
   }
 
   ManagedObjectMap Manager::loadManagedObjects()

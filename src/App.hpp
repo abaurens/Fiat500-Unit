@@ -8,6 +8,7 @@ class App : public QApplication
 {
 public:
   App(int &ac, char **av, int flags = ApplicationFlags);
+  ~App();
 
   int run();
 

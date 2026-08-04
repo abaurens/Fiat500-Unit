@@ -33,7 +33,9 @@ namespace Audio::PipeWire
 
   private:
     static void onGlobalRemove(void *data, uint32_t id);
-    static void onGlobal(void *data, uint32_t id, uint32_t permissions, const char *type, uint32_t version, const struct spa_dict *props);
+    static void onGlobal(void *data, uint32_t id, uint32_t permissions, const char *type, uint32_t version, const spa_dict *props);
+
+    Scope<Object> addObject(uint32_t id, Object::Type type, const spa_dict *props = nullptr);
 
   private:
     pw_main_loop *m_loop = nullptr; /// TODO: Change to use pw_loop and let Qt's event loop manage PipeWire events

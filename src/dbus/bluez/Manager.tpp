@@ -29,7 +29,7 @@ namespace DBus::Bluez
 
     // qDebug() << "Trying to create Object" << path.path() << "of type" << ObjType::InterfaceName;
 
-    ObjType *obj = new ObjType(path, interfaces, this);
+    ObjType *obj = new ObjType(path, interfaces, owner());
 
     addObject(*obj);
 

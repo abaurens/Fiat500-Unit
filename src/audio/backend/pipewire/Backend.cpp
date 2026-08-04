@@ -3,9 +3,12 @@
 #include <pipewire/context.h>
 #include <pipewire/core.h>
 
-#include "audio/backend/pipewire/Backend.hpp"
-#include "audio/backend/pipewire/Object.hpp"
 #include "audio/backend/pipewire/Log.hpp"
+#include "audio/backend/pipewire/Node.hpp"
+#include "audio/backend/pipewire/Port.hpp"
+#include "audio/backend/pipewire/Client.hpp"
+#include "audio/backend/pipewire/Device.hpp"
+#include "audio/backend/pipewire/Backend.hpp"
 
 #include <QDebug>
 
@@ -24,25 +27,6 @@ namespace Audio
 namespace Audio::PipeWire
 {
 
-  static QString dictToString(const spa_dict *dict)
-  {
-    if (!dict)
-      return {};
-
-    QString result;
-
-    const spa_dict_item *item;
-
-    spa_dict_for_each(item, dict)
-    {
-      result += QString("  %1 = %2\n")
-        .arg(item->key)
-        .arg(item->value);
-    }
-
-    return result;
-  }
-
   void Backend::onGlobalRemove(void *vdata, uint32_t id)
   {
     Backend *backend = static_cast<Backend *>(vdata);
@@ -52,7 +36,6 @@ namespace Audio::PipeWire
       return;
 
     backend->m_objects.erase(it);
-    //Log::debug(u"Backend"_s) << "Object removed:" << id;
   }
 
   void Backend::onGlobal(void *vdata, uint32_t id, uint32_t perms, const char *ctype, uint32_t vers, const struct spa_dict *props)
@@ -71,15 +54,15 @@ namespace Audio::PipeWire
       /// non-interface types are not supported
       return;
     }
-    type = type.substr(InterfacePrefix.size());
 
+    type = type.substr(InterfacePrefix.size());
     Object::Type otype = Object::Type::FromName(type);
 
-    //Log::debug(u"Backend"_s).nospace().noquote()
-    //  << "Object created: [" << id << "] " << otype.name()
-    //  << '\n' << dictToString(props);
-
-    backend->m_objects.emplace(id, make_scope<Object>(id, otype, props));
+    //Log::debug(u"Backend::onGlobal"_s).noquote().nospace()
+    //  << "Parsing object type '" << ctype
+    //  << "' results in Object::Type::" << otype.name() << " (" << otype.value() << ")";
+    backend->addObject(id, otype, props);
+    //qDebug() << ' ';
   }
 
   Backend::Backend() : m_registry{}
@@ -158,5 +141,36 @@ namespace Audio::PipeWire
   {
     Log::debug(u"PipeWire/Backend"_s) << "Starting main loop";
     m_thread = std::thread([this] { pw_main_loop_run(m_loop); });
+  }
+
+  Scope<Object> Backend::addObject(uint32_t id, Object::Type type, const spa_dict *props)
+  {
+    Scope<Object> result;
+
+    switch (type)
+    {
+    case Object::Type::Node:
+      result = make_scope<Node>(id, props);
+      break;
+
+    case Object::Type::Port:
+      result = make_scope<Port>(id, props);
+      break;
+
+    case Object::Type::Client:
+      result = make_scope<Client>(id, props);
+      break;
+
+    case Object::Type::Device:
+      result = make_scope<Device>(id, props);
+      break;
+
+    default:
+      ;//result = make_scope<Object>(id, type, props);
+    }
+
+    if (result)
+      m_objects.emplace(id, std::move(result));
+    return result;
   }
 }
