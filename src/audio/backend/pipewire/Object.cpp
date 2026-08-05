@@ -1,4 +1,5 @@
-#include "Log.hpp"
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "Object.hpp"
 
 #include <spa/utils/dict.h>
@@ -25,7 +26,7 @@ namespace Audio::PipeWire
 
   Object::~Object()
   {
-    // Log::debug(u"Object"_s).noquote() << *this << "removed.";
+    Log::debug(u"Object"_s).noquote() << *this << "removed.";
   }
 
   std::optional<QString> Object::tryProperty(const QString &name) const

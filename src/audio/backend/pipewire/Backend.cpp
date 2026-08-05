@@ -1,9 +1,16 @@
+#include "pch.hpp" // IWYU pragma: keep
+
+// PipeWire library needs access to these functions from the root namespace.
+// Somehow, it fails to find it with <math.h> using directives. So we redefine the macros here
+#define isnormal std::isnormal
+#define isinf    std::isinf
+#define signbit  std::signbit
+
 #include <pipewire/pipewire.h>
 #include <pipewire/main-loop.h>
 #include <pipewire/context.h>
 #include <pipewire/core.h>
 
-#include "audio/backend/pipewire/Log.hpp"
 #include "audio/backend/pipewire/Node.hpp"
 #include "audio/backend/pipewire/Port.hpp"
 #include "audio/backend/pipewire/Client.hpp"
@@ -13,6 +20,7 @@
 #include <QDebug>
 
 #include <memory>
+#include <string_view>
 
 namespace Audio
 {

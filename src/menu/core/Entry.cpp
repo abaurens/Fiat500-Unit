@@ -1,3 +1,5 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "Entry.hpp"
 #include "Page.hpp"
 

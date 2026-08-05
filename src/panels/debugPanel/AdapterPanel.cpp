@@ -1,3 +1,5 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "AdapterPanel.hpp"
 
 #include "widgets/sizes.hpp"

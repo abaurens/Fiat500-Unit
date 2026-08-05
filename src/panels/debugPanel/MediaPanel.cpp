@@ -1,3 +1,5 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "widgets/sizes.hpp"
 #include "MediaPanel.hpp"
 #include "dbus/bluez/Types.hpp"

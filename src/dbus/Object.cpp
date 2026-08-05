@@ -1,3 +1,5 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "dbus/Object.hpp"
 
 #include <QDBusConnection>

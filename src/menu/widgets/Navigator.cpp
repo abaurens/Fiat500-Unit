@@ -1,3 +1,5 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "Navigator.hpp"
 
 #include <QVBoxLayout>

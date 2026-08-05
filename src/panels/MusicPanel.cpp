@@ -1,3 +1,5 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "MusicPanel.hpp"
 
 #include <QVBoxLayout>

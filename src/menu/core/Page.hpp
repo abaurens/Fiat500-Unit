@@ -44,6 +44,5 @@ private:
 
 
 #ifndef SKIP_IMPLEMENTATION
-#include "Page.tpp"
-#undef PAGE_TPP
+#include "Page.tpp" // IWYU pragma: export
 #endif

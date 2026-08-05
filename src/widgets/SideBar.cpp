@@ -1,8 +1,9 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "SideBar.hpp"
 
 #include <QFrame>
 #include <QHBoxLayout>
-#include <QOverload>
 
 #include <panels/SettingsPanel.hpp>
 

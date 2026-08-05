@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Enum.hpp"
-#include "audio/backend/pipewire/Log.hpp"
 
 #include <frozen/map.h>
 #include <frozen/string.h>
@@ -45,6 +44,38 @@ namespace Audio::PipeWire
     QString propertyOr(const QString &name, const QString &defaultValue) const;
     QString propertyOr(const QString &name, QString &&defaultValue) const;
 
+    template<std::derived_from<Object> T>
+    const T *safeAs() const
+    {
+      if (m_type != T::StaticType)
+      {
+        Log::warning(u"Object"_s) << *this << "is not of type" << T::StaticType.name();
+        return nullptr;
+      }
+
+      return static_cast<const T*>(this);
+    }
+
+    template<std::derived_from<Object> T>
+    T *safeAs()
+    {
+      return const_cast<T *>(const_cast<const Object *>(this)->safeAs<T>());
+    }
+
+    template<std::derived_from<Object> T>
+    const T &as() const
+    {
+      const T *&&result = this->safeAs<T>();
+
+      Q_ASSERT(result != nullptr);
+      return result;
+    }
+
+    template<std::derived_from<Object> T>
+    T &as()
+    {
+      return const_cast<T &>(const_cast<const Object *>(this)->as<T>());
+    }
 
     template<class OS>
     friend OS &operator<<(OS &&os, const Object &obj)

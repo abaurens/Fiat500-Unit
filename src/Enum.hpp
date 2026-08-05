@@ -24,14 +24,14 @@ namespace Enums
   using basic_name = std::basic_string_view<CharT, CharTraits<CharT>>;
 
   template<class Nm, template<class C> class CharTraits>
-  concept NameOrQName = std::same_as<basic_name<char, CharTraits>, Nm> || std::same_as<basic_name<char16_t, CharTraits>, Nm>;
+  concept NameOrQName = std::same_as<basic_name<char, CharTraits>, Nm> || std::same_as<basic_name<c16, CharTraits>, Nm>;
 
   template<class Enum, std::enumeration T, template<class C> class CharTraits>
   struct Value
   {
   private:
     using Name = basic_name<char, CharTraits>;
-    using QName = basic_name<char16_t, CharTraits>;
+    using QName = basic_name<c16, CharTraits>;
 
   public:
     constexpr Value(T v, Name n, QName qn)
@@ -115,7 +115,7 @@ namespace Enums
 #define _enm_CONSTRUCT(name) { Values::name, #name, u ## #name }
 #define _enm_DECLARE(name) _enm_STAT_CEXP Value name { Values::name, #name, u ## #name };
 
-#define _enm_MAKE_ENUM(_name, _char_traits, ...)                                              \
+#define MAKE_ENUM_CT(_name, _char_traits, ...)                                                \
 struct _name                                                                                  \
 {                                                                                             \
 private:                                                                                      \
@@ -149,7 +149,7 @@ public:                                                                         
       return FromUnderlying(_name::s_parser.at(traits_cast<_char_traits>(name)));             \
     return _name::Unknown;                                                                    \
   }                                                                                           \
-  _enm_STAT_CEXP _name FromName(const Enums::basic_name<char16_t, std::char_traits> name) {   \
+  _enm_STAT_CEXP _name FromName(const Enums::basic_name<c16, std::char_traits> name) {        \
     if (s_qparser.contains(traits_cast<_char_traits>(name)))                                  \
       return FromUnderlying(_name::s_qparser.at(traits_cast<_char_traits>(name)));            \
     return _name::Unknown;                                                                    \
@@ -182,5 +182,5 @@ private:                                                                        
   Value m_data;                                                                               \
 }
 
-#define MAKE_ENUM_CI(_name, ...) _enm_MAKE_ENUM(_name, ci_char_traits, __VA_ARGS__)
-#define MAKE_ENUM(_name, ...) _enm_MAKE_ENUM(_name, std::char_traits, __VA_ARGS__)
+#define MAKE_ENUM_CI(_name, ...) MAKE_ENUM_CT(_name, ci_char_traits, __VA_ARGS__)
+#define MAKE_ENUM(_name, ...) MAKE_ENUM_CT(_name, std::char_traits, __VA_ARGS__)

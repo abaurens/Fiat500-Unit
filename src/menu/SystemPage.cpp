@@ -1,3 +1,5 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "SystemPage.hpp"
 
 #include "menu/widgets/ActionItem.hpp"

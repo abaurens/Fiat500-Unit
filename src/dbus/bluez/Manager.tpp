@@ -1,5 +1,6 @@
 #pragma once
-#define MANAGER_TPP
+
+// IWYU pragma: private; include "Manager.hpp"
 
 #include "Manager.hpp"
 

@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.16)
 project(Fiat500-Unit  VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_AUTORCC ON)
-set(CMAKE_C_STANDARD C11)
-set(CMAKE_CXX_STANDARD 20)
-#set(CMAKE_C_STANDARD_REQUIRED ON)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -48,13 +48,15 @@ qt_add_executable(${PROJECT_NAME}
 
     resources.qrc
 
+    src/pch.hpp
+    src/main.cpp
+
     src/Log.hpp
     src/Ref.hpp
     src/Enum.hpp
     src/Scope.hpp
     src/AbstractManager.hpp
-
-    src/main.cpp
+    src/CaseInsensitiveCharTrait.hpp
 
     src/App.hpp src/App.cpp
     src/MainWindow.hpp src/MainWindow.cpp
@@ -112,7 +114,11 @@ qt_add_executable(${PROJECT_NAME}
     src/audio/backend/pipewire/Client.hpp src/audio/backend/pipewire/Client.cpp
     src/audio/backend/pipewire/Object.hpp src/audio/backend/pipewire/Object.cpp
     src/audio/backend/pipewire/Backend.hpp src/audio/backend/pipewire/Backend.cpp
-    src/CaseInsensitiveCharTrait.hpp
+)
+
+target_precompile_headers(${PROJECT_NAME}
+    PRIVATE
+    src/pch.hpp
 )
 
 qt_add_translations(

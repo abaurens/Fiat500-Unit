@@ -1,3 +1,5 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "Breadcrumbs.hpp"
 #include "menu/core/Page.hpp"
 

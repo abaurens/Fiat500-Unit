@@ -6,7 +6,7 @@
 namespace Audio::PipeWire
 {
 
-  class Port : public Object
+  class Port final : public Object
   {
   public:
     MAKE_ENUM_CI(Direction, In, Out);
@@ -21,6 +21,18 @@ namespace Audio::PipeWire
     QString channel() const;
     uint32_t nodeId() const;
     Direction direction() const;
+
+    template<std::derived_from<Object> T>
+    T *safeAs() = delete;
+
+    template<std::derived_from<Object> T>
+    const T *safeAs() const = delete;
+
+    template<std::derived_from<Object> T>
+    T &as() = delete;
+
+    template<std::derived_from<Object> T>
+    const T &as() const = delete;
   };
 
 }

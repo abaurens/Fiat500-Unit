@@ -1,6 +1,7 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "Device.hpp"
 #include "Types.hpp"
-#include "Log.hpp"
 
 #include <QDBusConnection>
 

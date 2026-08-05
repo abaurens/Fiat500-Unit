@@ -9,20 +9,23 @@
 
 #include <QStringLiteral>
 
-using PropertyMap      = QVariantMap;
-using InterfaceMap     = QMap<QString, PropertyMap>;
-using ManagedObjectMap = QMap<QDBusObjectPath, InterfaceMap>;
+namespace DBus
+{
+  using PropertyMap      = QVariantMap;
+  using InterfaceMap     = QMap<QString, PropertyMap>;
+  using ManagedObjectMap = QMap<QDBusObjectPath, InterfaceMap>;
+}
 
-Q_DECLARE_METATYPE(InterfaceMap)
-Q_DECLARE_METATYPE(ManagedObjectMap)
+Q_DECLARE_METATYPE(DBus::InterfaceMap)
+Q_DECLARE_METATYPE(DBus::ManagedObjectMap)
 
 void registerDBusTypes();
 
-QDBusArgument &operator<<(QDBusArgument &argument, const InterfaceMap &map);
-QDBusArgument &operator>>(QDBusArgument &argument, InterfaceMap &map);
+QDBusArgument &operator<<(QDBusArgument &argument, const DBus::InterfaceMap &map);
+QDBusArgument &operator>>(QDBusArgument &argument, DBus::InterfaceMap &map);
 
-QDBusArgument &operator<<(QDBusArgument &argument, const ManagedObjectMap &map);
-QDBusArgument &operator>>(QDBusArgument &argument, ManagedObjectMap &map);
+QDBusArgument &operator<<(QDBusArgument &argument, const DBus::ManagedObjectMap &map);
+QDBusArgument &operator>>(QDBusArgument &argument, DBus::ManagedObjectMap &map);
 
 #define DECL_DBUS_PROPERTY(__property) { #__property, Property::__property }
 

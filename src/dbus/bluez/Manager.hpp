@@ -182,8 +182,7 @@ namespace DBus::Bluez
   };
 }
 
-#include "Manager.tpp"
-#undef MANAGER_TPP
+#include "Manager.tpp" // IWYU pragma: export
 
 #undef BLUEZ_OBJECT_TYPELIST
 #undef DECLARE_MANAGED_OBJECT

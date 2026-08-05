@@ -39,3 +39,9 @@ namespace Log
   static auto warning(const QStringView scope = u"/Core"_s)  { return (qWarning().noquote().nospace() << "[" << scope << "]:").quote().space();  }
   static auto critical(const QStringView scope = u"/Core"_s) { return (qCritical().noquote().nospace() << "[" << scope << "]:").quote().space(); }
 }
+
+#include "dbus/Log.hpp"  // IWYU pragma: export
+#include "dbus/bluez/Log.hpp"  // IWYU pragma: export
+
+#include "audio/Log.hpp" // IWYU pragma: export
+#include "audio/backend/pipewire/Log.hpp" // IWYU pragma: export

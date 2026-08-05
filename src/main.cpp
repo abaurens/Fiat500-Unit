@@ -1,3 +1,4 @@
+#include "pch.hpp" // IWYU pragma: keep
 
 #include "App.hpp"
 

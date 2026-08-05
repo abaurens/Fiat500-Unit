@@ -1,7 +1,6 @@
 #pragma once
 
 #include "dbus/Types.hpp"
-#include "dbus/Log.hpp"
 
 #include <QObject>
 #include <QDBusMessage>
@@ -21,7 +20,7 @@ namespace DBus
   public:
     using Path = QDBusObjectPath;
 
-    const Path &path() const { return m_path; };
+    const Path &path() const { return m_path; }
 
   protected:
     explicit Object(const Name &serviceName, const QString &interfaceName, const Path &path, const InterfaceMap &interfaces, QObject *parent = nullptr);

@@ -1,5 +1,6 @@
 #pragma once
-#define PAGE_TPP
+
+// IWYU pragma: private; include "page.hpp"
 
 #include "menu/widgets/ActionItem.hpp"
 // #include "menu/widgets/PageItem.hpp"

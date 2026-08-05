@@ -1,3 +1,5 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "dbus/bluez/Manager.hpp"
 
 #include "DebugPanel.hpp"

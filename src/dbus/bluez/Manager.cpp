@@ -1,6 +1,7 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "Manager.hpp"
 #include "Types.hpp"
-#include "Log.hpp"
 
 #include <QDBusMessage>
 

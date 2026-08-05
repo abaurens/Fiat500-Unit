@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Log.hpp"
+// IWYU pragma: private; include "Log.hpp"
 
 namespace Audio::Log
 {

@@ -1,3 +1,5 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "Page.hpp"
 
 Menu::Page::Page(const QString &name, Page *parent)

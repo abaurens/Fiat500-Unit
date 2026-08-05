@@ -5,7 +5,7 @@
 namespace Audio::PipeWire
 {
 
-  class Device : public Object
+  class Device final : public Object
   {
   public:
     static constexpr Type StaticType = Type::Device;
@@ -13,6 +13,22 @@ namespace Audio::PipeWire
     Device(uint32_t id, const spa_dict *props = nullptr);
 
     virtual ~Device() = default;
+
+    QString api() const;
+    QString name() const;
+    QString description() const;
+
+    template<std::derived_from<Object> T>
+    T *safeAs() = delete;
+
+    template<std::derived_from<Object> T>
+    const T *safeAs() const = delete;
+
+    template<std::derived_from<Object> T>
+    T &as() = delete;
+
+    template<std::derived_from<Object> T>
+    const T &as() const = delete;
   };
 
 }

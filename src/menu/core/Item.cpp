@@ -1,3 +1,5 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "Item.hpp"
 
 Menu::Item::Item(const QString &name, Page *parent) : Menu::Entry{ name, parent }, m_layout{ new QHBoxLayout(this) }

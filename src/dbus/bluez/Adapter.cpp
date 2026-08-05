@@ -1,6 +1,7 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "Adapter.hpp"
 #include "Types.hpp"
-#include "Log.hpp"
 
 namespace DBus::Bluez
 {

@@ -1,5 +1,6 @@
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "App.hpp"
-#include "Enum.hpp"
 #include "MainWindow.hpp"
 
 #include "audio/Manager.hpp"
@@ -7,11 +8,11 @@
 #include "dbus/bluez/Manager.hpp"
 #include "dbus/Types.hpp"
 
-#include <frozen/unordered_map.h>
-
 #include <QLocale>
 #include <QTranslator>
 #include <QCommandLineParser>
+
+#include "audio/backend/pipewire/Node.hpp"
 
 MAKE_ENUM(Command,
   opt_no_fullscreen
@@ -34,7 +35,6 @@ bool g_flags[Command::count()] = { false };
 
 App::App(int &ac, char **av, int flags) : QApplication{ ac, av, flags }
 {
-
   parseArgs();
 
   loadTranslations();
