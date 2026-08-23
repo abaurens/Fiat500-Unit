@@ -4,22 +4,18 @@
 
 #include <spa/utils/dict.h>
 
-namespace Audio::PipeWire
+namespace PipeWire
 {
 
-  Object::Object(uint32_t id, Type type, const spa_dict *props, const bool log) : m_type{ type }, m_id{ id }
+  Object::Object(uint32_t id, Type type, const spa_dict *props) : m_type{ type }, m_id{ id }
   {
     if (!props)
       return;
 
     const spa_dict_item *item;
 
-    if (log)
-      Log::debug(u"Object"_s).noquote() << *this << "created with properties:";
     spa_dict_for_each(item, props)
     {
-      if (log)
-        qDebug().nospace().noquote() << "  [" << item->key << "] = \"" << item->value << "\"";
       m_properties.insert(item->key, item->value);
     }
   }

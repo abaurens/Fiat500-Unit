@@ -100,20 +100,28 @@ qt_add_executable(${PROJECT_NAME}
 
     src/menu/SystemPage.hpp src/menu/SystemPage.cpp
 
-    # Audio stack
-    src/audio/Log.hpp
-    src/audio/Sink.hpp
-    src/audio/Source.hpp
-    src/audio/Backend.hpp
-    src/audio/Manager.hpp src/audio/Manager.cpp
+    # Media stack
+    src/media/Log.hpp
+    src/media/Sink.hpp
+    src/media/Source.hpp
 
-    src/audio/backend/pipewire/Log.hpp
-    src/audio/backend/pipewire/Node.hpp src/audio/backend/pipewire/Node.cpp
-    src/audio/backend/pipewire/Port.hpp src/audio/backend/pipewire/Port.cpp
-    src/audio/backend/pipewire/Device.hpp src/audio/backend/pipewire/Device.cpp
-    src/audio/backend/pipewire/Client.hpp src/audio/backend/pipewire/Client.cpp
-    src/audio/backend/pipewire/Object.hpp src/audio/backend/pipewire/Object.cpp
-    src/audio/backend/pipewire/Backend.hpp src/audio/backend/pipewire/Backend.cpp
+    src/media/Manager.hpp src/media/Manager.cpp
+
+    src/media/audio/Log.hpp
+    src/media/audio/Sink.hpp src/media/audio/Sink.cpp
+    src/media/audio/Source.hpp src/media/audio/Source.cpp
+
+    src/media/video/Log.hpp
+    src/media/video/Sink.hpp src/media/video/Sink.cpp
+    src/media/video/Source.hpp src/media/video/Source.cpp
+
+    src/pipewire/Log.hpp
+    src/pipewire/Node.hpp src/pipewire/Node.cpp
+    src/pipewire/Port.hpp src/pipewire/Port.cpp
+    src/pipewire/Device.hpp src/pipewire/Device.cpp
+    src/pipewire/Client.hpp src/pipewire/Client.cpp
+    src/pipewire/Object.hpp src/pipewire/Object.cpp
+    src/pipewire/Context.hpp src/pipewire/Context.cpp
 )
 
 target_precompile_headers(${PROJECT_NAME}

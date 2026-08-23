@@ -10,19 +10,30 @@ private:                                              \
   friend class ManagerType;                           \
   explicit _type(QObject *owner = nullptr);           \
   virtual ~_type() {                                  \
-    _type::deinitializeInstance();                    \
+      _type::deinitializeImpl();                      \
   }                                                   \
 public:                                               \
   static _type &instance(QObject *parent = nullptr) { \
     return ManagerType::instance<_type>(parent);      \
   }                                                   \
   static bool initialize(QObject *parent = nullptr) { \
-    return instance(parent).initializeInstance();     \
+    return instance(parent).initializeImpl();         \
   }                                                   \
   static void deinitialize() {                        \
-    return instance().deinitializeInstance();         \
+    instance().deinitializeImpl();                    \
   }                                                   \
 private:                                              \
+  bool initializeImpl() {                             \
+    if (!m_initialized)                               \
+      m_initialized = initializeInstance();           \
+    return m_initialized;                             \
+  }                                                   \
+  void deinitializeImpl() {                           \
+    if (!m_initialized)                               \
+      return;                                         \
+    deinitializeInstance();                           \
+    m_initialized = false;                            \
+  }                                                   \
   virtual bool initializeInstance() final override;   \
   virtual void deinitializeInstance() final override
 
@@ -51,4 +62,5 @@ protected:
 
 protected:
   QObject *m_owner = nullptr;
+  bool    m_initialized = false;
 };

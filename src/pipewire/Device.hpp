@@ -1,8 +1,8 @@
 #pragma once
 
-#include "audio/backend/pipewire/Object.hpp"
+#include "pipewire/Object.hpp"
 
-namespace Audio::PipeWire
+namespace PipeWire
 {
 
   class Device final : public Object

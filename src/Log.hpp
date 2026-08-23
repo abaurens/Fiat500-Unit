@@ -43,5 +43,8 @@ namespace Log
 #include "dbus/Log.hpp"  // IWYU pragma: export
 #include "dbus/bluez/Log.hpp"  // IWYU pragma: export
 
-#include "audio/Log.hpp" // IWYU pragma: export
-#include "audio/backend/pipewire/Log.hpp" // IWYU pragma: export
+#include "media/Log.hpp"
+#include "media/audio/Log.hpp" // IWYU pragma: export
+#include "media/video/Log.hpp" // IWYU pragma: export
+
+#include "pipewire/Log.hpp" // IWYU pragma: export

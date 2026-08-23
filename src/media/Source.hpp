@@ -2,13 +2,15 @@
 
 #include <QString>
 
-namespace Audio
+namespace Media
 {
 
   class Source
   {
   public:
-    virtual const QString &name() const = 0;
+    virtual ~Source() = default;
+
+    virtual QString name() const = 0;
     virtual bool hasMetadata() const = 0;
     virtual bool canControlPlayback() const = 0;
 

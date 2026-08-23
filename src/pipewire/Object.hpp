@@ -11,7 +11,7 @@
 
 struct spa_dict;
 
-namespace Audio::PipeWire
+namespace PipeWire
 {
 
   class Object
@@ -33,7 +33,7 @@ namespace Audio::PipeWire
     );
 
   public:
-    Object(uint32_t id, Type type, const spa_dict *props = nullptr, const bool log = false);
+    Object(uint32_t id, Type type, const spa_dict *props = nullptr);
 
     virtual ~Object();
 

@@ -1,14 +1,15 @@
 #pragma once
 
-#include <QString>
-
-namespace Audio
+namespace Media
 {
 
   class Sink
   {
   public:
-    virtual const QString &name() const = 0;
+
+    virtual ~Sink() = default;
+
+    virtual QString name() const = 0;
     virtual unsigned channels() const = 0;
 
     virtual float volume() const = 0;

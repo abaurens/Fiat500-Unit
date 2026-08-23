@@ -156,6 +156,7 @@ public:                                                                         
   }                                                                                           \
   _enm_STAT_CEXP size_t hash(_name value, size_t seed) { return hash(value, seed); }          \
   _enm_STAT_CEXP size_t hash(Value value, size_t seed) { return Value::hash(value, seed); }   \
+  constexpr _name() : m_data{ Unknown } {}                                                    \
   constexpr _name(Value v) : m_data{ v } {}                                                   \
   constexpr operator Value() const { return m_data; }                                         \
   template<std::integral T>                                                                   \

@@ -103,7 +103,7 @@ namespace DBus::Bluez
     // explicit Manager(QObject *parent = nullptr);
 
   private slots:
-    void onInterfacesAdded(const QDBusObjectPath &path, const InterfaceMap &interfaces);
+    void onInterfacesAdded(const QDBusObjectPath &path, const DBus::InterfaceMap &interfaces);
     void onInterfacesRemoved(const QDBusObjectPath &path, const QStringList &interfaces);
 
   // Init functions

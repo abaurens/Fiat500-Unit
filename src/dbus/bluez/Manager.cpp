@@ -126,7 +126,7 @@ namespace DBus::Bluez
 
     m_bus.connect(
       ServiceName, RootPath, Interface::ObjectManager, Method::InterfacesAdded,
-      this, SLOT(onInterfacesAdded(QDBusObjectPath, InterfaceMap))
+      this, SLOT(onInterfacesAdded(QDBusObjectPath, DBus::InterfaceMap))
     );
     m_bus.connect(
       ServiceName, RootPath, Interface::ObjectManager, Method::InterfacesRemoved,
@@ -146,7 +146,7 @@ namespace DBus::Bluez
     );
     m_bus.disconnect(
       ServiceName, RootPath, Interface::ObjectManager, Method::InterfacesAdded,
-      this, SLOT(onInterfacesAdded(QDBusObjectPath, InterfaceMap))
+      this, SLOT(onInterfacesAdded(QDBusObjectPath, DBus::InterfaceMap))
     ),
     m_adapter = nullptr;
   }

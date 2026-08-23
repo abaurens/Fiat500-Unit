@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Enum.hpp"
-#include "audio/backend/pipewire/Object.hpp"
+#include "pipewire/Object.hpp"
 
-namespace Audio::PipeWire
+namespace PipeWire
 {
 
   class Port final : public Object

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "audio/backend/pipewire/Object.hpp"
+#include "pipewire/Object.hpp"
 
 #include <QStringView>
 
-namespace Audio::PipeWire
+namespace PipeWire
 {
 
-  class Node final : public Object
+  class Node : public Object
   {
   public:
     MAKE_ENUM(MediaClass,
@@ -20,10 +20,16 @@ namespace Audio::PipeWire
       MidiBridge
     );
 
+    static Scope<Node> Create(uint32_t id,  const spa_dict *props = nullptr);
+
+  private:
+    Node(uint32_t id, MediaClass mediaClass, std::nullptr_t, const spa_dict *props = nullptr);
+
+  protected:
+    Node(uint32_t id, MediaClass mediaClass, const spa_dict *props = nullptr);
+
   public:
     static constexpr Type StaticType = Type::Node;
-
-    Node(uint32_t id, const spa_dict *props = nullptr);
 
     virtual ~Node() = default;
 
@@ -41,13 +47,33 @@ namespace Audio::PipeWire
   public:
     static constexpr MediaClass parseMediaClass(const QStringView str)
     {
+      // Find the separator
       const qsizetype slash = str.indexOf('/');
 
+      // Fail to parse if more than 1 separator
       if (slash != str.lastIndexOf('/'))
         return MediaClass::Unknown;
 
+      // Remove the separator
       QString name{ str };
-      name.removeIf([](auto ch) { return ch == '/'; });
+      name.removeAt(slash);
+      //name.removeIf([](auto ch) { return ch == '/'; });
+
+      return MediaClass::FromName(name);
+    }
+
+    static constexpr MediaClass parseMediaClass(const std::string_view str)
+    {
+      // Find the separator
+      const size_t slash = str.find_first_of('/');
+
+      // Fail to parse if more than 1 separator
+      if (slash != str.find_last_of('/'))
+        return MediaClass::Unknown;
+
+      // Remove the separator
+      std::string name{ str };
+      name.erase(name.begin() + slash);
 
       return MediaClass::FromName(name);
     }

@@ -3,7 +3,7 @@
 #include "App.hpp"
 #include "MainWindow.hpp"
 
-#include "audio/Manager.hpp"
+#include "media/Manager.hpp"
 
 #include "dbus/bluez/Manager.hpp"
 #include "dbus/Types.hpp"
@@ -12,7 +12,7 @@
 #include <QTranslator>
 #include <QCommandLineParser>
 
-#include "audio/backend/pipewire/Node.hpp"
+// #include "pipewire/Node.hpp"
 
 MAKE_ENUM(Command,
   opt_no_fullscreen
@@ -46,7 +46,8 @@ App::App(int &ac, char **av, int flags) : QApplication{ ac, av, flags }
 
 App::~App()
 {
-
+  DBus::Bluez::Manager::deinitialize();
+  Media::Manager::deinitialize();
 }
 
 void App::parseArgs()
@@ -83,8 +84,8 @@ void App::setupDBus()
 
 void App::setupPipewire()
 {
-  Audio::Manager::initialize();
-  Audio::Manager::backend().run();
+  Media::Manager::initialize();
+  // Media::Manager::runLoop();
 }
 
 void App::loadTranslations()
