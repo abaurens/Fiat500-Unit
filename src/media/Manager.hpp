@@ -1,24 +1,12 @@
 #pragma once
 #include "pipewire/Context.hpp"
-
-//#include <spa/utils/hook.h>
-
-#include "Scope.hpp"
+#include "pipewire/Object.hpp"
 
 #include "AbstractManager.hpp"
-#include "pipewire/Object.hpp"
-// #include "pipewire/Backend.hpp"
+#include "Scope.hpp"
 
-// #include <thread>
 #include <unordered_map>
-
 #include <QObject>
-//#include <QSocketNotifier>
-
-struct pw_core;
-struct pw_context;
-struct pw_registry;
-struct pw_loop;
 
 namespace Media
 {

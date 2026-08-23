@@ -29,7 +29,9 @@ namespace PipeWire
       Metadata,
       Client,
       Device,
-      Port
+      Port,
+      Monitor,
+      Link
     );
 
   public:

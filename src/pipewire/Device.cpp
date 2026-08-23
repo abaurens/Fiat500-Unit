@@ -9,13 +9,12 @@ namespace PipeWire
 
   Device::Device(uint32_t id, const spa_dict *props) : Object{ id, StaticType, props }
   {
-    const spa_dict_item *item;
-
-    Log::debug(u"Device"_s).noquote() << *this << "created with properties:";
-    spa_dict_for_each(item, props)
-    {
-      qDebug().nospace().noquote() << "  [" << item->key << "] = \"" << item->value << "\"";
-    }
+    //const spa_dict_item *item;
+    //Log::debug(u"Device"_s).noquote() << *this << "created with properties:";
+    //spa_dict_for_each(item, props)
+    //{
+    //  qDebug().nospace().noquote() << "  [" << item->key << "] = \"" << item->value << "\"";
+    //}
   }
 
   QString Device::api() const

@@ -1,26 +1,25 @@
 #pragma once
 
-#include "Enum.hpp"
 #include "pipewire/Object.hpp"
 
 namespace PipeWire
 {
 
-  class Port final : public Object
+  class Link final : public Object
   {
   public:
-    MAKE_ENUM_CI(Direction, In, Out);
 
-    static constexpr Type StaticType = Type::Port;
+    static constexpr Type StaticType = Type::Link;
 
-    Port(uint32_t id, const spa_dict *props = nullptr);
+    Link(u32 id, const spa_dict *props = nullptr);
 
-    virtual ~Port() override = default;
+    virtual ~Link() override = default;
 
-    QString name() const;
-    QString channel() const;
-    uint32_t nodeId() const;
-    Direction direction() const;
+    u32 outputNodeId() const;
+    u32 outputPortId() const;
+
+    u32 inputNodeId() const;
+    u32 inputPortId() const;
 
     template<std::derived_from<Object> T> T &as() = delete;
     template<std::derived_from<Object> T> T *safeAs() = delete;
@@ -29,4 +28,3 @@ namespace PipeWire
   };
 
 }
-

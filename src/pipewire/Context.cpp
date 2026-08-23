@@ -29,7 +29,7 @@ namespace PipeWire
   }
 
 
-  Context::Context(QObject *parent) : QObject{parent}
+  Context::Context(QObject *parent) : QObject{ parent }
   {}
 
   void Context::iterate()
@@ -83,17 +83,11 @@ namespace PipeWire
       this
     );
 
-    const int fd = pw_loop_get_fd(m_loop);
-
-    m_pipeWireNotifier = new QSocketNotifier(
-      fd,
-      QSocketNotifier::Read,
-      this
-    );
+    m_pipeWireNotifier.emplace(pw_loop_get_fd(m_loop), QSocketNotifier::Read, nullptr);
 
     connect(
-      m_pipeWireNotifier, &QSocketNotifier::activated,
-      this,               &Context::iterate
+      &m_pipeWireNotifier.value(), &QSocketNotifier::activated,
+      this,                        &Context::iterate
     );
 
     Log::debug(u"PipeWire/Backend"_s) << "Connected to PipeWire";
@@ -104,27 +98,36 @@ namespace PipeWire
     if (m_pipeWireNotifier)
     {
       m_pipeWireNotifier->setEnabled(false);
-      m_pipeWireNotifier->deleteLater();
-      m_pipeWireNotifier = nullptr;
+      m_pipeWireNotifier.reset();
     }
 
-    //pw_main_loop_quit(m_loop);
+    spa_hook_remove(&m_registryListener);
 
-    //if (m_thread.joinable())
-    //  m_thread.join();
-
-    //Log::debug(u"PipeWire/Backend"_s) << "Main loop stopped";
+    if (m_registry)
+    {
+      pw_proxy_destroy(reinterpret_cast<pw_proxy *>(m_registry));
+      m_registry = nullptr;
+    }
 
     if (m_core)
+    {
       pw_core_disconnect(m_core);
+      m_core = nullptr;
+    }
 
     if (m_context)
+    {
       pw_context_destroy(m_context);
+      m_context = nullptr;
+    }
 
     if (m_loop)
+    {
       pw_loop_destroy(m_loop);
-    //if (m_loop)
-    //  pw_main_loop_destroy(m_loop);
+      m_loop = nullptr;
+    }
+
+    pw_deinit();
   }
 
 }

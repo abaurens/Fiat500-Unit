@@ -52,13 +52,12 @@ namespace PipeWire
     if (mediaClass != MediaClass::MidiBridge)
       return;
 
-    const spa_dict_item *item;
-
-    Log::debug(u"Node"_s).noquote() << *this << "created with properties:";
-    spa_dict_for_each(item, props)
-    {
-      qDebug().nospace().noquote() << "  [" << item->key << "] = \"" << item->value << "\"";
-    }
+    //const spa_dict_item *item;
+    //Log::debug(u"Node"_s).noquote() << *this << "created with properties:";
+    //spa_dict_for_each(item, props)
+    //{
+    //  qDebug().nospace().noquote() << "  [" << item->key << "] = \"" << item->value << "\"";
+    //}
   }
 
   Node::Node(uint32_t id, MediaClass mediaClass, const spa_dict *props)

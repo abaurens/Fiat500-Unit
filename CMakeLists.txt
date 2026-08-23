@@ -122,6 +122,7 @@ qt_add_executable(${PROJECT_NAME}
     src/pipewire/Client.hpp src/pipewire/Client.cpp
     src/pipewire/Object.hpp src/pipewire/Object.cpp
     src/pipewire/Context.hpp src/pipewire/Context.cpp
+    src/pipewire/Link.hpp src/pipewire/Link.cpp
 )
 
 target_precompile_headers(${PROJECT_NAME}

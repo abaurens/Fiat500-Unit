@@ -12,24 +12,17 @@ namespace PipeWire
 
     Client(uint32_t id, const spa_dict *props = nullptr);
 
-    virtual ~Client() = default;
+    virtual ~Client() override = default;
 
     pid_t pid() const;
     uid_t uid() const;
     gid_t gid() const;
     QString applicationName() const;
 
-    template<std::derived_from<Object> T>
-    T *safeAs() = delete;
-
-    template<std::derived_from<Object> T>
-    const T *safeAs() const = delete;
-
-    template<std::derived_from<Object> T>
-    T &as() = delete;
-
-    template<std::derived_from<Object> T>
-    const T &as() const = delete;
+    template<std::derived_from<Object> T> T &as() = delete;
+    template<std::derived_from<Object> T> T *safeAs() = delete;
+    template<std::derived_from<Object> T> const T &as() const = delete;
+    template<std::derived_from<Object> T> const T *safeAs() const = delete;
   };
 
 }

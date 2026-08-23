@@ -31,7 +31,7 @@ namespace PipeWire
   public:
     static constexpr Type StaticType = Type::Node;
 
-    virtual ~Node() = default;
+    virtual ~Node() override = default;
 
     QString name() const;
     QString nick() const;

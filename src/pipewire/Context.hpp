@@ -44,7 +44,7 @@ namespace PipeWire
 
     spa_hook      m_registryListener;
 
-    QSocketNotifier *m_pipeWireNotifier = nullptr;
+    std::optional<QSocketNotifier> m_pipeWireNotifier = std::nullopt;
   };
 
 }

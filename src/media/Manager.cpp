@@ -2,6 +2,7 @@
 
 #include "pipewire/Node.hpp"
 #include "pipewire/Port.hpp"
+#include "pipewire/Link.hpp"
 #include "pipewire/Device.hpp"
 #include "pipewire/Client.hpp"
 #include "pipewire/Object.hpp"
@@ -10,23 +11,24 @@
 
 namespace Media
 {
-  Manager::Manager(QObject *owner) : ManagerType { owner }, m_pipewire{ owner }
+  Manager::Manager(QObject *owner) : ManagerType { owner }, m_pipewire{}
   {}
 
   bool Manager::initializeInstance()
   {
     Log::debug(u"Manager"_s) << "Initializing";
 
-    m_pipewire.initialize();
-
     connect(
       &m_pipewire, &PipeWire::Context::objectCreated,
-      this,        &Manager::onObjectCreated
+      this,        &Manager::onObjectCreated,
+      Qt::DirectConnection
     );
     connect(
       &m_pipewire, &PipeWire::Context::objectRemoved,
       this,        &Manager::onObjectRemoved
     );
+
+    m_pipewire.initialize();
 
     return true;
   }
@@ -47,7 +49,6 @@ namespace Media
     switch (type)
     {
     case PipeWire::Object::Type::Node:
-      // result = make_scope<Node>(id, props);
       result = PipeWire::Node::Create(id, props);
       break;
 
@@ -61,6 +62,10 @@ namespace Media
 
     case PipeWire::Object::Type::Device:
       result = make_scope<PipeWire::Device>(id, props);
+      break;
+
+    case PipeWire::Object::Type::Link:
+      result = make_scope<PipeWire::Link>(id, props);
       break;
 
     default:
