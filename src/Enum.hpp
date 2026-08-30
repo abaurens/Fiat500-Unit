@@ -77,6 +77,20 @@ namespace Enums
       return seed ^ static_cast<size_t>(m_val);
     }
 
+    template<class OS>
+    friend OS &&operator<<(OS &&os, const Value &val)
+    {
+      if constexpr (std::is_base_of_v<std::ostream, std::remove_cvref_t<OS>>)
+      {
+        os << val.m_name << "(" << static_cast<size_t>(val.m_val) << ")";
+      }
+      else if constexpr (std::is_base_of_v<QDebug, std::remove_cvref_t<OS>>)
+      {
+        os.noquote() << val.m_name << "(" << static_cast<size_t>(val.m_val) << ")";
+      }
+      return std::forward<OS>(os);
+    }
+
   private:
     friend Enum;
     T     m_val;
@@ -115,6 +129,7 @@ namespace Enums
 #define _enm_CONSTRUCT(name) { Values::name, #name, u ## #name }
 #define _enm_DECLARE(name) _enm_STAT_CEXP Value name { Values::name, #name, u ## #name };
 
+/// @brief Declares a strong typed enumeration with specific char trait (used for serialization/deserialization)
 #define MAKE_ENUM_CT(_name, _char_traits, ...)                                                \
 struct _name                                                                                  \
 {                                                                                             \
@@ -154,6 +169,11 @@ public:                                                                         
       return FromUnderlying(_name::s_qparser.at(traits_cast<_char_traits>(name)));            \
     return _name::Unknown;                                                                    \
   }                                                                                           \
+  _enm_STAT_CEXP _name FromNumeric(size_t value) {     \
+    if (value >= Count)                                \
+      return _name::Unknown;                           \
+    return FromUnderlying(static_cast<Values>(value)); \
+  }                                                    \
   _enm_STAT_CEXP size_t hash(_name value, size_t seed) { return hash(value, seed); }          \
   _enm_STAT_CEXP size_t hash(Value value, size_t seed) { return Value::hash(value, seed); }   \
   constexpr _name() : m_data{ Unknown } {}                                                    \
@@ -183,5 +203,8 @@ private:                                                                        
   Value m_data;                                                                               \
 }
 
+/// @brief Declares a strong typed enumeration with case insensitive char traits
 #define MAKE_ENUM_CI(_name, ...) MAKE_ENUM_CT(_name, ci_char_traits, __VA_ARGS__)
+
+/// @brief Declare a strong typed enumeration
 #define MAKE_ENUM(_name, ...) MAKE_ENUM_CT(_name, std::char_traits, __VA_ARGS__)

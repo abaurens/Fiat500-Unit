@@ -96,7 +96,7 @@ namespace DBus::Bluez
 
     default:
      #ifndef NDEBUG
-      // debug() << m_path.path() << ": Unhandled property " << name << "changed to" << value;
+      // debug() << m_path.path() << ": Unhandled property" << name << "changed to" << value;
      #endif
       break;
     }

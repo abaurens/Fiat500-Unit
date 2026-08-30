@@ -2,6 +2,8 @@
 
 #include "Enum.hpp"
 
+#include "pipewire/ParamInfo.hpp"
+
 #include <frozen/map.h>
 #include <frozen/string.h>
 
@@ -35,11 +37,12 @@ namespace PipeWire
     );
 
   public:
-    Object(uint32_t id, Type type, const spa_dict *props = nullptr);
+    Object(u32 id, Type type, const spa_dict *props = nullptr);
 
     virtual ~Object();
 
-    uint32_t id() const { return m_id; }
+    u32 id() const { return m_id; }
+    Type type() const { return m_type; }
 
     std::optional<QString> tryProperty(const QString &name) const;
     QString property(const QString& key) const;
@@ -61,32 +64,37 @@ namespace PipeWire
     template<std::derived_from<Object> T>
     T *safeAs()
     {
-      return const_cast<T *>(const_cast<const Object *>(this)->safeAs<T>());
+      if (m_type != T::StaticType)
+      {
+        Log::warning(u"Object"_s) << *this << "is not of type" << T::StaticType.name();
+        return nullptr;
+      }
+
+      return static_cast<T*>(this);
     }
 
     template<std::derived_from<Object> T>
     const T &as() const
     {
-      const T *&&result = this->safeAs<T>();
-
-      Q_ASSERT(result != nullptr);
-      return result;
+      Q_ASSERT(m_type == T::StaticType);
+      return *safeAs<T>();
     }
 
     template<std::derived_from<Object> T>
     T &as()
     {
-      return const_cast<T &>(const_cast<const Object *>(this)->as<T>());
+      Q_ASSERT(m_type == T::StaticType);
+      return *safeAs<T>();
     }
 
     template<class OS>
-    friend OS &operator<<(OS &&os, const Object &obj)
+    friend OS &&operator<<(OS &&os, const Object &obj)
     {
       std::stringstream ss;
 
-      ss << obj.m_type.name() << " (" << obj.m_id << ")";
+      ss << obj.type().name() << " (" << obj.id() << ")";
       os << ss.str();
-      return os;
+      return std::forward<OS>(os);
     }
 
   protected:
@@ -97,20 +105,27 @@ namespace PipeWire
 
     virtual void onPropertyChanged(const QString &name, const QString &value)
     {
-     #ifndef NDEBUG
-      Log::debug(u"Object"_s) << "Unhandled property" << name << "changed to" << value;
-     #endif
+    // #ifndef NDEBUG
+    //  Log::debug(u"Object"_s) << "Unhandled property" << name << "changed to" << value;
+    // #endif
     }
 
     virtual void onPropertiesChanged([[maybe_unused]] const QSet<QString> &changed) {}
 
-  private:
-    bool updateProperty(const QString &propertyName, const QString &newValue);
+    bool updateParamInfo(const spa_param_info &info)
+    {
+      return m_paramInfos[info.id].update(info);
+    }
+
     void updateProperties(const spa_dict *props);
 
   private:
+    bool updateProperty(const QString &propertyName, const QString &newValue);
+
+  private:
     Type m_type;
-    uint32_t m_id;
+    u32 m_id;
+    QHash<u32, ParamInfo> m_paramInfos;
     QMap<QString, QString> m_properties;
   };
 

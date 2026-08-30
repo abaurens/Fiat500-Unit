@@ -54,6 +54,7 @@ qt_add_executable(${PROJECT_NAME}
     src/Log.hpp
     src/Ref.hpp
     src/Enum.hpp
+    src/Local.hpp
     src/Scope.hpp
     src/AbstractManager.hpp
     src/CaseInsensitiveCharTrait.hpp
@@ -116,13 +117,19 @@ qt_add_executable(${PROJECT_NAME}
     src/media/video/Source.hpp src/media/video/Source.cpp
 
     src/pipewire/Log.hpp
+    src/pipewire/Bindable.hpp
+    src/pipewire/ParamInfo.hpp
+    src/pipewire/Direction.hpp
+    src/pipewire/MediaClass.hpp
+    src/pipewire/AudioFormat.hpp
+    src/pipewire/Link.hpp src/pipewire/Link.cpp
     src/pipewire/Node.hpp src/pipewire/Node.cpp
     src/pipewire/Port.hpp src/pipewire/Port.cpp
     src/pipewire/Device.hpp src/pipewire/Device.cpp
     src/pipewire/Client.hpp src/pipewire/Client.cpp
     src/pipewire/Object.hpp src/pipewire/Object.cpp
     src/pipewire/Context.hpp src/pipewire/Context.cpp
-    src/pipewire/Link.hpp src/pipewire/Link.cpp
+
 )
 
 target_precompile_headers(${PROJECT_NAME}

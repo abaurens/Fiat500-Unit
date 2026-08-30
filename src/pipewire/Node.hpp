@@ -1,85 +1,71 @@
 #pragma once
 
 #include "pipewire/Object.hpp"
+#include "pipewire/Bindable.hpp"
+#include "pipewire/MediaClass.hpp"
+#include "pipewire/AudioFormat.hpp"
+
+#include <pipewire/node.h>
 
 #include <QStringView>
 
 namespace PipeWire
 {
 
-  class Node : public Object
+  class Node : public Object, Bindable(node, NODE)
   {
-  public:
-    MAKE_ENUM(MediaClass,
-      AudioSink,
-      AudioSource,
-
-      VideoSink,
-      VideoSource,
-
-      MidiBridge
-    );
-
-    static Scope<Node> Create(uint32_t id,  const spa_dict *props = nullptr);
-
-  private:
-    Node(uint32_t id, MediaClass mediaClass, std::nullptr_t, const spa_dict *props = nullptr);
-
-  protected:
-    Node(uint32_t id, MediaClass mediaClass, const spa_dict *props = nullptr);
+    using Proxy = Bindable(node, NODE);
 
   public:
     static constexpr Type StaticType = Type::Node;
 
+    Node(u32 id, pw_node *proxy, const spa_dict *props = nullptr);
     virtual ~Node() override = default;
+
+    std::optional<u32> deviceId() const;
+    const std::optional<AudioFormat> &audioFormat() const;
 
     QString name() const;
     QString nick() const;
     QString description() const;
     MediaClass mediaClass() const;
 
+    //void enumerateFormats();
+
     template<std::derived_from<Object> T> T &as() = delete;
     template<std::derived_from<Object> T> T *safeAs() = delete;
     template<std::derived_from<Object> T> const T &as() const = delete;
     template<std::derived_from<Object> T> const T *safeAs() const = delete;
 
+    template<class OS>
+    friend OS &&operator<<(OS &&os, const Node &obj)
+    {
+      std::stringstream ss;
+
+      QString name = obj.nick().isEmpty() ? obj.name() : obj.nick();
+
+      ss << name.toStdString() << " (" << obj.id() << ")";
+      os << ss.str();
+      return std::forward<OS>(os);
+    }
+
   private:
-  public:
-    static constexpr MediaClass parseMediaClass(const QStringView str)
-    {
-      // Find the separator
-      const qsizetype slash = str.indexOf('/');
+    void onStateInfo(pw_node_state state);
+    void onPropertyInfos(spa_dict *props);
+    void onParamInfos(spa_param_info *params, u32 count);
+    void onInputPortsInfo(u32 inputPorts);
+    void onOutputPortsInfo(u32 outputPorts);
 
-      // Fail to parse if more than 1 separator
-      if (slash != str.lastIndexOf('/'))
-        return MediaClass::Unknown;
+    void onAudioFormatParam(const spa_pod &param, u32 subtype);
 
-      // Remove the separator
-      QString name{ str };
-      name.removeAt(slash);
-      //name.removeIf([](auto ch) { return ch == '/'; });
+    void onFormatParam(const spa_pod &param);
 
-      return MediaClass::FromName(name);
-    }
-
-    static constexpr MediaClass parseMediaClass(const std::string_view str)
-    {
-      // Find the separator
-      const size_t slash = str.find_first_of('/');
-
-      // Fail to parse if more than 1 separator
-      if (slash != str.find_last_of('/'))
-        return MediaClass::Unknown;
-
-      // Remove the separator
-      std::string name{ str };
-      name.erase(name.begin() + slash);
-
-      return MediaClass::FromName(name);
-    }
+    virtual void onInfo(const pw_node_info &info) override;
+    virtual void onParam(u32 id, u32 index, u32 next, const spa_pod &param) override;
 
   private:
     MediaClass m_mediaClass;
+    Local<AudioFormat> m_audioFormat;
   };
 
 }

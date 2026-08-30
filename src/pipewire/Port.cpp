@@ -7,7 +7,8 @@
 namespace PipeWire
 {
 
-  Port::Port(uint32_t id, const spa_dict *props) : Object{ id, StaticType, props }
+  Port::Port(u32 id, const spa_dict *props)
+    : Object{ id, StaticType, props }
   {
     //const spa_dict_item *item;
     //Log::debug(u"Port"_s).noquote() << *this << "created with properties:";
@@ -15,6 +16,11 @@ namespace PipeWire
     //{
     //  qDebug().nospace().noquote() << "  [" << item->key << "] = \"" << item->value << "\"";
     //}
+  }
+
+  u32 Port::nodeId() const
+  {
+    return property("node.id").toUInt();
   }
 
   QString Port::name() const
@@ -27,12 +33,7 @@ namespace PipeWire
     return propertyOr("audio.channel", "");
   }
 
-  uint32_t Port::nodeId() const
-  {
-    return property("node.id").toInt();
-  }
-
-  Port::Direction Port::direction() const
+  Direction Port::direction() const
   {
     return Direction::FromName(property("port.direction"));
   }

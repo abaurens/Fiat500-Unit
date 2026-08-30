@@ -7,7 +7,8 @@
 namespace PipeWire
 {
 
-  Object::Object(uint32_t id, Type type, const spa_dict *props) : m_type{ type }, m_id{ id }
+  Object::Object(uint32_t id, Type type, const spa_dict *props)
+    : m_type{ type }, m_id{ id }
   {
     if (!props)
       return;

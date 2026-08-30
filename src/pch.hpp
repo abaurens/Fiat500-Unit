@@ -7,6 +7,7 @@
 #include <set>           // IWYU pragma: export
 #include <map>           // IWYU pragma: export
 #include <array>         // IWYU pragma: export
+#include <bitset>        // IWYU pragma: export
 #include <vector>        // IWYU pragma: export
 #include <unordered_set> // IWYU pragma: export
 #include <unordered_map> // IWYU pragma: export
@@ -46,6 +47,7 @@ using namespace Qt::StringLiterals;
 
 #include "Ref.hpp"   // IWYU pragma: export
 #include "Scope.hpp" // IWYU pragma: export
+#include "Local.hpp" // IWYU pragma: export
 #include "Enum.hpp"  // IWYU pragma: export
 
 #include "Log.hpp"   // IWYU pragma: export

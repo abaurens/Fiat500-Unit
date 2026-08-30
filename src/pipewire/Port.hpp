@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Enum.hpp"
 #include "pipewire/Object.hpp"
+#include "pipewire/Direction.hpp"
 
 namespace PipeWire
 {
@@ -9,17 +9,15 @@ namespace PipeWire
   class Port final : public Object
   {
   public:
-    MAKE_ENUM_CI(Direction, In, Out);
-
     static constexpr Type StaticType = Type::Port;
 
     Port(uint32_t id, const spa_dict *props = nullptr);
 
     virtual ~Port() override = default;
 
+    u32 nodeId() const;
     QString name() const;
     QString channel() const;
-    uint32_t nodeId() const;
     Direction direction() const;
 
     template<std::derived_from<Object> T> T &as() = delete;

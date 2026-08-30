@@ -6,15 +6,18 @@ struct spa_dict;
 
 struct pw_loop;
 struct pw_core;
+struct pw_node;
+struct pw_device;
 struct pw_context;
 struct pw_registry;
+
+#include <pipewire/core.h>
 
 #include <QObject>
 #include <QSocketNotifier>
 
 namespace PipeWire
 {
-
   class Context : public QObject
   {
     Q_OBJECT
@@ -25,16 +28,33 @@ namespace PipeWire
     void initialize();
     void deinitialize();
 
+    template<class Proxy, u32 MaxVersion>
+    Proxy *bindObject(u32 id, u32 version, const char *interfaceType)
+    {
+      return static_cast<Proxy *>(
+        pw_registry_bind(
+          m_registry,
+          id,
+          interfaceType,
+          std::min(version, u32{MaxVersion}),
+          0
+        )
+      );
+    }
+
+    pw_node *bindNode(u32 id, u32 version);
+    pw_device *bindDevice(u32 id, u32 version);
+
   signals:
     void objectRemoved(u32 id);
-    void objectCreated(u32 id, u32 perms, const char *type, u32 version, const struct spa_dict *props);
+    void objectCreated(u32 id, u32 perms, const char *type, u32 version, const spa_dict *props);
 
   private slots:
     void iterate();
 
   private:
-    static void onGlobalRemove(void *data, uint32_t id);
-    static void onGlobal(void *data, uint32_t id, uint32_t permissions, const char *type, uint32_t version, const spa_dict *props);
+    static void onGlobalRemove(void *data, u32 id);
+    static void onGlobal(void *data, u32 id, u32 permissions, const char *type, u32 version, const spa_dict *props);
 
   private:
     pw_loop      *m_loop = nullptr;
@@ -44,7 +64,7 @@ namespace PipeWire
 
     spa_hook      m_registryListener;
 
-    std::optional<QSocketNotifier> m_pipeWireNotifier = std::nullopt;
+    Local<QSocketNotifier> m_pipeWireNotifier = std::nullopt;
   };
 
 }

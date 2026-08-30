@@ -1,3 +1,5 @@
+#include "pch.hpp"
+
 // PipeWire library needs access to these functions from the root namespace.
 // Somehow, it fails to find it with <math.h> using directives. So we redefine the macros here
 #define isnormal std::isnormal
@@ -8,20 +10,21 @@
 #include <pipewire/main-loop.h>
 #include <pipewire/context.h>
 #include <pipewire/core.h>
+#include <pipewire/node.h>
 
 #include "Context.hpp"
 
 namespace PipeWire
 {
 
-  void Context::onGlobalRemove(void *vdata, uint32_t id)
+  void Context::onGlobalRemove(void *vdata, u32 id)
   {
     Context *context = static_cast<Context *>(vdata);
 
     emit context->objectRemoved(id);
   }
 
-  void Context::onGlobal(void *vdata, uint32_t id, uint32_t perms, const char *ctype, uint32_t vers, const struct spa_dict *props)
+  void Context::onGlobal(void *vdata, u32 id, u32 perms, const char *ctype, u32 vers, const spa_dict *props)
   {
     Context *context = static_cast<Context *>(vdata);
 
@@ -130,4 +133,21 @@ namespace PipeWire
     pw_deinit();
   }
 
+  pw_node *Context::bindNode(u32 id, u32 version)
+  {
+    return static_cast<pw_node *>(
+      pw_registry_bind(
+        m_registry,
+        id,
+        PW_TYPE_INTERFACE_Node,
+        std::min(version, u32{PW_VERSION_NODE}),
+        0
+      )
+    );
+  }
+
+  pw_device *Context::bindDevice(u32 id, u32 version)
+  {
+    return bindObject<pw_device, PW_VERSION_DEVICE>(id, version, PW_TYPE_INTERFACE_Device);
+  }
 }

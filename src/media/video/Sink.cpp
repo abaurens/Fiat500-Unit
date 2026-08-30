@@ -3,29 +3,22 @@
 namespace Media::Video
 {
 
-  Sink::Sink(uint32_t id, const spa_dict *props)
-    : PipeWire::Node{ id, MediaClass::VideoSink, props }
-  {
-    //Log::debug().nospace().noquote() << "Video sink (" << id << ") created";
-  }
+  Sink::Sink() {}
 
-  Sink::~Sink()
-  {
-    //Log::debug().nospace().noquote() << "Video sink (" << id() << ") destroyed";
-  }
+  Sink::~Sink() {}
 
-  unsigned Sink::channels() const
-  {
-    return 2;
-  }
+  //unsigned Sink::channels() const
+  //{
+  //  return 2;
+  //}
 
-  float Sink::volume() const
-  {
-    return 0.0f;
-  }
+  //float Sink::volume() const
+  //{
+  //  return 0.0f;
+  //}
 
-  void Sink::setVolume(float volume)
-  {
-    ;
-  }
+  //void Sink::setVolume(float volume)
+  //{
+  //  ;
+  //}
 }
