@@ -20,15 +20,11 @@ namespace PipeWire
       Proxy{ proxy, pw_node_add_listener},
     m_mediaClass{ parseMediaClass(propertyOr(SPA_KEY_MEDIA_CLASS, "")) }
   {
-    if (m_mediaClass == MediaClass::Unknown)
-      return;
+    //if (m_mediaClass == MediaClass::Unknown)
+    //  return;
 
-    const spa_dict_item *item;
-    Log::debug(u"Node"_s).noquote() << *this << "created with properties:";
-    spa_dict_for_each(item, props)
-    {
-      qDebug().nospace().noquote() << "  [" << item->key << "] = \"" << item->value << "\"";
-    }
+    if (name().startsWith("BAA"))
+      Log::debug(u"Node"_s) << *this << " created with properties: " << props;
   }
 
   //bool Node::isBluetooth() const
@@ -85,12 +81,12 @@ namespace PipeWire
 
   void Node::onInputPortsInfo(u32 inputPorts)
   {
-    //Log::debug(u"Node"_s).noquote().nospace() << *this << " number of input ports changed";
+    //Log::debug(u"Node"_s) << *this << " number of input ports changed";
   }
 
   void Node::onOutputPortsInfo(u32 outputPorts)
   {
-    //Log::debug(u"Node"_s).noquote().nospace() << *this << " number of output ports changed";
+    //Log::debug(u"Node"_s) << *this << " number of output ports changed";
   }
 
   void Node::onPropertyInfos(spa_dict *props)
@@ -104,18 +100,12 @@ namespace PipeWire
     //if (!device || device->api() != "bluez5")
     //  return;
     //
-    //Log::debug(u"Node"_s).noquote().nospace() << *this << " [" << device->name() << "]<" << device->api() << "> received properties:";
-    //
-    //const spa_dict_item *item;
-    //spa_dict_for_each(item, props)
-    //{
-    //  qDebug().nospace().noquote() << "  [" << item->key << "] = \"" << item->value << "\"";
-    //}
+    //Log::debug(u"Node"_s) << *this << " [" << device->name() << "]<" << device->api() << "> received properties:\n" << props;
   }
 
   void Node::onStateInfo(pw_node_state state)
   {
-    //Log::debug(u"Node"_s).noquote().nospace() << *this << " received output state update";
+    //Log::debug(u"Node"_s) << *this << " received output state update";
   }
 
   void Node::onParamInfos(spa_param_info *params, u32 count)
@@ -223,8 +213,8 @@ namespace PipeWire
     default:
       Log::debug(u"Node"_s)
         << *this
-        << "media type:" << mediaType
-        << "subtype:" << mediaSubtype;
+        << " media type: " << mediaType
+        << "subtype: " << mediaSubtype;
     }
   }
 
@@ -237,8 +227,8 @@ namespace PipeWire
         break;
 
       default:
-        Log::debug(u"Node"_s) << *this << "received param:" << id << "index:" << index
-          << "next:" << next << "pod type:" << param.type << "pod size:" << param.size;
+        Log::debug(u"Node"_s) << *this << " received param: " << id << " index: " << index
+          << " next: " << next << " pod type: " << param.type << " pod size: " << param.size;
         break;
     }
   }

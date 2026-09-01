@@ -28,7 +28,7 @@ namespace DBus::Bluez
     if (!interfaces.contains(ObjType::InterfaceName))
       return 0;
 
-    // qDebug() << "Trying to create Object" << path.path() << "of type" << ObjType::InterfaceName;
+    // qDebug() << "Trying to create Object " << path.path() << " of type " << ObjType::InterfaceName;
 
     ObjType *obj = new ObjType(path, interfaces, owner());
 
@@ -43,7 +43,7 @@ namespace DBus::Bluez
     if (!interfaces.contains(ObjType::InterfaceName.toQString()))
       return 0;
 
-    // qDebug() << "Trying to remove Object" << path.path() << "of type" << ObjType::InterfaceName;
+    // qDebug() << "Trying to remove Object " << path.path() << " of type " << ObjType::InterfaceName;
 
     ObjType *obj = nullptr;
     if (getObject(path, obj))

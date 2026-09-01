@@ -10,3 +10,33 @@ namespace PipeWire::Log
   static auto warning(const QStringView scope = u""_s)  { return ::Log::warning(::Log::make_path(u"/PipeWire"_s, scope));  }
   static auto critical(const QStringView scope = u""_s) { return ::Log::critical(::Log::make_path(u"/PipeWire"_s, scope)); }
 }
+
+#include <spa/utils/dict.h>
+
+template<class OS>
+OS &&operator<<(OS &&os, const spa_dict *const dictionary)
+{
+  if (!dictionary)
+    os << "nulldict";
+
+  size_t len = 0;
+
+  const spa_dict_item *item;
+  os << "{";
+  spa_dict_for_each(item, dictionary)
+  {
+    ++len;
+    os << "\n  [" << item->key << "] = \"" << item->value << "\"";
+  }
+
+  os << (len ? "\n}" : "}");
+
+  return std::forward<OS>(os);
+}
+
+template<class OS>
+OS &&operator<<(OS &&os, const spa_dict &dictionary)
+{
+  os << &dictionary;
+  return std::forward<OS>(os);
+}

@@ -1,12 +1,13 @@
 #include "pch.hpp" // IWYU pragma: keep
 
 #include "Manager.hpp"
-#include "pipewire/Client.hpp"
+#include "pipewire/ObjectAwaiter.hpp"
+#include "pipewire/objects/Client.hpp"
 
 #define ASSERT_OBJECT_TYPE(id, _type) do {      \
   [[maybe_unused]] const PipeWire::Object *obj; \
   Q_ASSERT(                                     \
-       (obj = object(id)) != nullptr            \
+      (obj = object(id)) != nullptr             \
     && obj->type() == _type::StaticType         \
   );                                            \
 } while (false)
@@ -144,6 +145,10 @@ namespace Media
     return result.values();
   }
 
+  PipeWire::ObjectAwaiter Manager::waitForObject(u32 id)
+  {
+    return PipeWire::ObjectAwaiter{ id };
+  }
 
 
 
@@ -179,42 +184,39 @@ namespace Media
     disconnect(&m_pipewire, nullptr, this, nullptr);
   }
 
-  /// Create and add the object to the registry
-  PipeWire::Object *Manager::addObject(u32 id, u32 version, PipeWire::Object::Type type, const spa_dict *props)
+  /// Create the objects of which we know and supports the type
+  Scope<PipeWire::Object> Manager::createObject(u32 id, u32 version, PipeWire::Object::Type type, const spa_dict *props)
   {
     Scope<PipeWire::Object> object = nullptr;
 
     switch (type)
     {
     case PipeWire::Object::Type::Node:
-      object = make_scope<PipeWire::Node>(id, m_pipewire.bindNode(id, version), props);
+      return makeScope<PipeWire::Node>(id, m_pipewire.bindNode(id, version), props);
       break;
 
     case PipeWire::Object::Type::Port:
-      object = make_scope<PipeWire::Port>(id, props);
+      return makeScope<PipeWire::Port>(id, props);
       break;
 
     case PipeWire::Object::Type::Device:
-      object = make_scope<PipeWire::Device>(id, m_pipewire.bindDevice(id, version), props);
+      return makeScope<PipeWire::Device>(id, m_pipewire.bindDevice(id, version), props);
       break;
 
     case PipeWire::Object::Type::Link:
-      object = make_scope<PipeWire::Link>(id, props);
+      return makeScope<PipeWire::Link>(id, props);
       break;
 
     case PipeWire::Object::Type::Client:
-      object = make_scope<PipeWire::Client>(id, props);
+      return makeScope<PipeWire::Client>(id, props);
       break;
 
     default:
-      ;//object = make_scope<Object>(id, version, type, props);
+      //object = makeScope<Object>(id, version, type, props);
+      break;
     }
 
-    PipeWire::Object *result = object.get();
-
-    if (object)
-      m_objects.emplace(id, std::move(object));
-    return result;
+    return nullptr;
   }
 
   void Manager::onObjectRemoved(u32 id)
@@ -223,6 +225,7 @@ namespace Media
     if (it == m_objects.cend())
       return;
 
+    emit objectRemoved(*it->second);
     m_objects.erase(it);
   }
 
@@ -243,32 +246,14 @@ namespace Media
     type = type.substr(InterfacePrefix.size());
     const PipeWire::Object::Type otype = PipeWire::Object::Type::FromName(type);
 
-    auto *object = addObject(id, version, otype, props);
+    // Create the object
+    Scope<PipeWire::Object> object = createObject(id, version, otype, props);
+    if (!object)
+      return;
 
-    if (otype == PipeWire::Object::Type::Device)
-    {
-      auto &device = object->as<PipeWire::Device>();
+    PipeWire::Object &obj = *object;
 
-      if (device.api() == "bluez5")
-      {
-        Log::debug(u"Manager"_s)
-          << "Bluetooth PipeWire device:"
-          << device.description()
-          << device.name();
-      }
-    }
-    else if (otype == PipeWire::Object::Type::Node)
-    {
-      auto &node = object->as<PipeWire::Node>();
-
-      if (auto *device = deviceForNode(node.id()))
-      {
-        Log::debug(u"Manager"_s)
-          << node.name()
-          << "belongs to"
-          << device->name()
-          << "(" << device->api() << ")";
-      }
-    }
+    m_objects.emplace(id, std::move(object));
+    emit objectAdded(obj);
   }
 }

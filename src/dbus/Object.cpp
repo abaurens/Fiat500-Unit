@@ -142,8 +142,6 @@ namespace DBus
       this, SLOT(onPropertiesChanged_dbus(QString, QDBusMessage))
     );
 
-    // qDebug() << "Subscribed to" << Service << m_path.path() << Interface::Properties << Method::PropertiesChanged;
-
     Q_ASSERT(ok);
   }
 
@@ -153,8 +151,6 @@ namespace DBus
       m_serviceName, m_path.path(), Interface::Properties, Method::PropertiesChanged,
       this, SLOT(onPropertiesChanged_dbus(QString, QDBusMessage))
     );
-
-    // qDebug() << "unsibscribed from" << Service << m_path.path() << Interface::Properties << Method::PropertiesChanged;
 
     Q_ASSERT(ok);
   }

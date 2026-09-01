@@ -56,6 +56,8 @@ qt_add_executable(${PROJECT_NAME}
     src/Enum.hpp
     src/Local.hpp
     src/Scope.hpp
+    src/AsyncTask.hpp
+    src/SignalAwaiter.hpp
     src/AbstractManager.hpp
     src/CaseInsensitiveCharTrait.hpp
 
@@ -106,6 +108,7 @@ qt_add_executable(${PROJECT_NAME}
     src/media/Sink.hpp
     src/media/Source.hpp
 
+
     src/media/Manager.hpp src/media/Manager.cpp
 
     src/media/audio/Log.hpp
@@ -122,14 +125,20 @@ qt_add_executable(${PROJECT_NAME}
     src/pipewire/Direction.hpp
     src/pipewire/MediaClass.hpp
     src/pipewire/AudioFormat.hpp
-    src/pipewire/Link.hpp src/pipewire/Link.cpp
-    src/pipewire/Node.hpp src/pipewire/Node.cpp
-    src/pipewire/Port.hpp src/pipewire/Port.cpp
-    src/pipewire/Device.hpp src/pipewire/Device.cpp
-    src/pipewire/Client.hpp src/pipewire/Client.cpp
-    src/pipewire/Object.hpp src/pipewire/Object.cpp
-    src/pipewire/Context.hpp src/pipewire/Context.cpp
 
+    src/pipewire/Context.hpp src/pipewire/Context.cpp
+    src/pipewire/ObjectAwaiter.hpp src/pipewire/ObjectAwaiter.cpp
+
+    src/pipewire/objects/Link.hpp src/pipewire/objects/Link.cpp
+    src/pipewire/objects/Node.hpp src/pipewire/objects/Node.cpp
+    src/pipewire/objects/Port.hpp src/pipewire/objects/Port.cpp
+    src/pipewire/objects/Device.hpp src/pipewire/objects/Device.cpp
+    src/pipewire/objects/Client.hpp src/pipewire/objects/Client.cpp
+    src/pipewire/objects/Object.hpp src/pipewire/objects/Object.cpp
+
+    src/pipewire/handles/Handle.hpp
+    src/pipewire/handles/Filter.hpp src/pipewire/handles/Filter.cpp
+    src/DetachedTask.hpp
 )
 
 target_precompile_headers(${PROJECT_NAME}

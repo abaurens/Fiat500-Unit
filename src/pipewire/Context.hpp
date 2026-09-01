@@ -16,6 +16,8 @@ struct pw_registry;
 #include <QObject>
 #include <QSocketNotifier>
 
+#include "pipewire/handles/Filter.hpp" // IWYU pragma: keep
+
 namespace PipeWire
 {
   class Context : public QObject
@@ -44,6 +46,11 @@ namespace PipeWire
 
     pw_node *bindNode(u32 id, u32 version);
     pw_device *bindDevice(u32 id, u32 version);
+
+    //template<DerivedFromHandle T>
+    //Scope<T> createHandle(const QString &name) { return Scope<T>{}; }
+
+    Scope<Filter> createFilter(std::string_view name);
 
   signals:
     void objectRemoved(u32 id);

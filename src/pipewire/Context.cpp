@@ -16,22 +16,6 @@
 
 namespace PipeWire
 {
-
-  void Context::onGlobalRemove(void *vdata, u32 id)
-  {
-    Context *context = static_cast<Context *>(vdata);
-
-    emit context->objectRemoved(id);
-  }
-
-  void Context::onGlobal(void *vdata, u32 id, u32 perms, const char *ctype, u32 vers, const spa_dict *props)
-  {
-    Context *context = static_cast<Context *>(vdata);
-
-    emit context->objectCreated(id, perms, ctype, vers, props);
-  }
-
-
   Context::Context(QObject *parent) : QObject{ parent }
   {}
 
@@ -150,4 +134,40 @@ namespace PipeWire
   {
     return bindObject<pw_device, PW_VERSION_DEVICE>(id, version, PW_TYPE_INTERFACE_Device);
   }
+
+  Scope<Filter> Context::createFilter(std::string_view name)
+  {
+    pw_properties *properties = pw_properties_new(
+      PW_KEY_NODE_NAME, name.data(),
+      nullptr
+    );
+
+    Filter::HandleType *filter = pw_filter_new(
+      m_core,
+      name.data(),
+      properties
+    );
+
+    if (!filter)
+      return nullptr;
+
+    return makeScope<Filter>(filter);
+  }
 }
+
+
+// Static callbacks
+void PipeWire::Context::onGlobalRemove(void *vdata, u32 id)
+{
+  Context *context = static_cast<Context *>(vdata);
+
+  emit context->objectRemoved(id);
+}
+
+void PipeWire::Context::onGlobal(void *vdata, u32 id, u32 perms, const char *ctype, u32 vers, const spa_dict *props)
+{
+  Context *context = static_cast<Context *>(vdata);
+
+  emit context->objectCreated(id, perms, ctype, vers, props);
+}
+

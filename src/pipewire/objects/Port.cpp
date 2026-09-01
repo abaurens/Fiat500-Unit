@@ -10,12 +10,8 @@ namespace PipeWire
   Port::Port(u32 id, const spa_dict *props)
     : Object{ id, StaticType, props }
   {
-    //const spa_dict_item *item;
-    //Log::debug(u"Port"_s).noquote() << *this << "created with properties:";
-    //spa_dict_for_each(item, props)
-    //{
-    //  qDebug().nospace().noquote() << "  [" << item->key << "] = \"" << item->value << "\"";
-    //}
+    if (name().startsWith("BAA"))
+      Log::debug(u"Port"_s) << *this << " created with properties: " << props;
   }
 
   u32 Port::nodeId() const

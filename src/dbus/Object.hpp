@@ -144,7 +144,7 @@ namespace DBus
     virtual void onPropertyChanged(const QString &name, const QVariant &value)
     {
      #ifndef NDEBUG
-      // qDebug() << m_path.path() << ": Unhandled property" << name << "changed to" << value;
+      //Log::debug() << m_path.path() << ": Unhandled property " << name << " changed to " << value;
      #endif
     }
 

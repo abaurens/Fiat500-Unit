@@ -23,7 +23,7 @@ namespace PipeWire
 
   Object::~Object()
   {
-    Log::debug(u"Object"_s).noquote() << *this << "removed.";
+    Log::debug(u"Object"_s) << *this << " removed.";
   }
 
   std::optional<QString> Object::tryProperty(const QString &name) const
@@ -41,7 +41,7 @@ namespace PipeWire
     const std::optional<QString> &result = tryProperty(name);
 
     if (!result.has_value())
-      Log::warning(u"Object"_s) << m_id << "does not have a property named" << name;
+      Log::warning(u"Object"_s).quote() << m_id << " does not have a property named " << name;
     Q_ASSERT(result.has_value());
 
     if (!result.has_value())

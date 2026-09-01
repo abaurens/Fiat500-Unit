@@ -13,14 +13,7 @@ namespace PipeWire
     Proxy { proxy, pw_device_add_listener },
     m_mediaClass{ parseMediaClass(propertyOr(SPA_KEY_MEDIA_CLASS, "")) }
   {
-    //pw_device_add_listener()
-
-    //const spa_dict_item *item;
-    //Log::debug(u"Device"_s).noquote() << *this << "created with properties:";
-    //spa_dict_for_each(item, props)
-    //{
-    //  qDebug().nospace().noquote() << "  [" << item->key << "] = \"" << item->value << "\"";
-    //}
+    //Log::debug(u"Device"_s) << *this << " created with properties: " << props;
   }
 
   QString Device::api() const
@@ -61,18 +54,12 @@ namespace PipeWire
     //if (api() != "bluez5")
     //  return;
     //
-    //Log::debug(u"Device"_s).noquote().nospace() << *this << "<" << api() << "> received properties:";
-    //
-    //const spa_dict_item *item;
-    //spa_dict_for_each(item, props)
-    //{
-    //  qDebug().nospace().noquote() << "  [" << item->key << "] = \"" << item->value << "\"";
-    //}
+    //Log::debug(u"Device"_s) << *this << " <" << api() << "> received properties:\n" << props;
   }
 
   void Device::onParamInfos(spa_param_info *params)
   {
-    //Log::debug(u"Node"_s).noquote().nospace() << *this << " received output param update";
+    //Log::debug(u"Node"_s) << *this << " received output param update";
   }
 
   void Device::onInfo(const pw_device_info &info)

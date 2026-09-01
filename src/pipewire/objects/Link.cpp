@@ -11,7 +11,7 @@ namespace PipeWire
 
   Link::Link(u32 id, const spa_dict *props) : Object{ id, StaticType, props }
   {
-    //Log::debug(u"Link"_s).noquote() << *this << "created:";
+    //Log::debug(u"Link"_s) << *this << "created:";
     //
     //const auto *const outputNode = Media::Manager::node(outputNodeId());
     //const auto *const outputPort = outputNode ? Media::Manager::port(outputPortId()) : nullptr;
@@ -19,7 +19,7 @@ namespace PipeWire
     //const auto *const inputNode = Media::Manager::node(inputNodeId());
     //const auto *const inputPort = inputNode ? Media::Manager::port(inputPortId()) : nullptr;
     //
-    //Log::debug(u"Link"_s).nospace().noquote()
+    //Log::debug(u"Link"_s)
     //  << "  "
     //  << (outputNode ? outputNode->name() : "NULL")
     //  << ":"
@@ -27,18 +27,13 @@ namespace PipeWire
     //
     //Log::debug(u"Link"_s) << "    ->";
     //
-    //Log::debug(u"Link"_s).nospace().noquote()
+    //Log::debug(u"Link"_s)
     //  << "  "
     //  << (inputNode ? inputNode->name() : "NULL")
     //  << ":"
     //  << (inputPort ? inputPort->name() : "NULL");
 
-    //const spa_dict_item *item;
-    //Log::debug(u"Link"_s).noquote() << *this << "created with properties:";
-    //spa_dict_for_each(item, props)
-    //{
-    //  qDebug().nospace().noquote() << "  [" << item->key << "] = \"" << item->value << "\"";
-    //}
+    //Log::debug(u"Link"_s) << *this << " created with properties: " << props;
   }
 
   u32 Link::outputNodeId() const

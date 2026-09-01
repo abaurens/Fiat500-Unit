@@ -73,9 +73,9 @@ namespace DBus::Bluez
     MediaPlayer *const player = Manager::mediaPlayers().value(playerPath, nullptr);
 
     if (player != nullptr)
-      Log::debug(u"MediaControl"_s)<< "player changed to" << *player;
+      Log::debug(u"MediaControl"_s)<< "player changed to " << *player;
     else
-      Log::debug(u"MediaControl"_s)<< "player changed to" << nullptr;
+      Log::debug(u"MediaControl"_s)<< "player changed to " << nullptr;
 
     emit playerChanged(player);
   }

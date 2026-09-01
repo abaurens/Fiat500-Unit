@@ -1,12 +1,13 @@
 #pragma once
 #include "pipewire/Context.hpp"
 #include "pipewire/Direction.hpp"
+#include "pipewire/ObjectAwaiter.hpp"
 
-#include "pipewire/Node.hpp"
-#include "pipewire/Port.hpp"
-#include "pipewire/Link.hpp"
-#include "pipewire/Device.hpp"
-#include "pipewire/Object.hpp"
+#include "pipewire/objects/Node.hpp"
+#include "pipewire/objects/Port.hpp"
+#include "pipewire/objects/Link.hpp"
+#include "pipewire/objects/Device.hpp"
+#include "pipewire/objects/Object.hpp"
 
 #include "Scope.hpp"
 #include "AbstractManager.hpp"
@@ -37,6 +38,8 @@ namespace Media
     DECLARE_MANAGED_OBJECT(PipeWire::Device, device)
 
   public:
+    static PipeWire::Context &context() { return instance().m_pipewire; }
+
     static PipeWire::Object *object(u32 id);
 
     static PipeWire::Device *deviceForNode(u32 nodeId);
@@ -47,13 +50,18 @@ namespace Media
 
     static QList<PipeWire::Node *> connectedNodes(u32 nodeId, PipeWire::Direction direction = PipeWire::Direction::Unknown);
 
-  private slots:
+    static PipeWire::ObjectAwaiter waitForObject(u32 id);
 
+  signals:
+    void objectAdded(PipeWire::Object &object);
+    void objectRemoved(PipeWire::Object &object);
+
+  private slots:
     void onObjectRemoved(u32 id);
     void onObjectCreated(u32 id, u32 permissions, const char *type, u32 version, const spa_dict *props);
 
   private:
-    PipeWire::Object *addObject(u32 id, u32 version, PipeWire::Object::Type type, const spa_dict *props = nullptr);
+    Scope<PipeWire::Object> createObject(u32 id, u32 version, PipeWire::Object::Type type, const spa_dict *props = nullptr);
 
   private:
     PipeWire::Context m_pipewire;

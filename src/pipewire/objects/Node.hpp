@@ -1,9 +1,9 @@
 #pragma once
 
-#include "pipewire/Object.hpp"
 #include "pipewire/Bindable.hpp"
 #include "pipewire/MediaClass.hpp"
 #include "pipewire/AudioFormat.hpp"
+#include "pipewire/objects/Object.hpp"
 
 #include <pipewire/node.h>
 

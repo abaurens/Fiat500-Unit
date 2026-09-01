@@ -61,7 +61,7 @@ DebugPanel::DebugPanel(QWidget *parent) : QWidget(parent)
     m_devicePanel, &DevicePanel::deviceSelected,
     [this](DBus::Bluez::Device *device)
     {
-      qDebug() << "Selected device for audio playback" << (device ? device->path().path() : "nullptr");
+      Log::debug(u"DebugPanel"_s) << "Selected device for audio playback" << (device ? device->path().path() : "nullptr");
       m_mediaPanel->setMediaControler(Manager::getObject<MediaControl>(device));
     }
   );

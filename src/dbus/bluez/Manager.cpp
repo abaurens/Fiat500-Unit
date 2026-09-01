@@ -22,7 +22,7 @@ namespace DBG
 }
 
 #define LOG_DBG(_scope, _case, _msg) do { if constexpr (DBG::log_##_case) { Log::debug(_scope) << _msg; } } while(0)
-#define TYP_LOG_DBG(_scope, _case, _type, _msg) do { if constexpr (DBG::log_##_case) { (Log::debug(_scope).noquote() << _type::TypeName).quote() << _msg; } } while(0)
+#define TYP_LOG_DBG(_scope, _case, _type, _msg) do { if constexpr (DBG::log_##_case) { (Log::debug(_scope) << _type::TypeName).quote() << _msg; } } while(0)
 
 #define OBJ_TYPE_OF(_name) std::remove_pointer_t<typename decltype(m_##_name##s)::mapped_type>
 
@@ -54,12 +54,12 @@ namespace DBus::Bluez
     // We don't want to replace the current adapter.
     if (m_adapter)
     {
-      TYP_LOG_DBG(u"Manager"_s, interface_added, Adapter, "appeared:" << adapter.path());
+      TYP_LOG_DBG(u"Manager"_s, interface_added, Adapter, "appeared: " << adapter.path());
       TYP_LOG_DBG(u"Manager"_s, interface_added, Adapter, "  We currently only support 1 adapter...");
       return;
     }
 
-    TYP_LOG_DBG(u"Manager"_s, adapter_added, Adapter, "set:" << adapter);
+    TYP_LOG_DBG(u"Manager"_s, adapter_added, Adapter, "set: " << adapter);
 
     m_adapter = &adapter;
   }
@@ -71,7 +71,7 @@ namespace DBus::Bluez
     if (!m_adapter || path != m_adapter->path())
       return;
 
-    TYP_LOG_DBG(u"Manager"_s, adapter_added, Adapter, "removed:" << adapter.path().path());
+    TYP_LOG_DBG(u"Manager"_s, adapter_added, Adapter, "removed: " << adapter.path().path());
 
     delete m_adapter;
     m_adapter = nullptr;
@@ -114,7 +114,7 @@ namespace DBus::Bluez
 
     ManagedObjectMap objects = loadManagedObjects();
 
-    LOG_DBG(u"Manager"_s, initialize, "Objects:" << objects.size());
+    LOG_DBG(u"Manager"_s, initialize, "Objects: " << objects.size());
 
     for (auto it = objects.cbegin(); it != objects.cend(); ++it)
     {
@@ -176,14 +176,14 @@ namespace DBus::Bluez
 
   void Manager::onInterfacesAdded(const Object::Path &path, const InterfaceMap &interfaces)
   {
-    LOG_DBG(u"Manager"_s, interface_added, "Added:" << path.path());
+    LOG_DBG(u"Manager"_s, interface_added, "Added: " << path.path());
 
     createObjects(path, interfaces);
   }
 
   void Manager::onInterfacesRemoved(const Object::Path &path, const QStringList &interfaces)
   {
-    LOG_DBG(u"Manager"_s, interface_removed, "Removed:" << path.path());
+    LOG_DBG(u"Manager"_s, interface_removed, "Removed: " << path.path());
 
     removeObjects(path, interfaces);
   }

@@ -169,11 +169,11 @@ public:                                                                         
       return FromUnderlying(_name::s_qparser.at(traits_cast<_char_traits>(name)));            \
     return _name::Unknown;                                                                    \
   }                                                                                           \
-  _enm_STAT_CEXP _name FromNumeric(size_t value) {     \
-    if (value >= Count)                                \
-      return _name::Unknown;                           \
-    return FromUnderlying(static_cast<Values>(value)); \
-  }                                                    \
+  _enm_STAT_CEXP _name FromNumeric(size_t value) {                                            \
+    if (value >= Count)                                                                       \
+      return _name::Unknown;                                                                  \
+    return FromUnderlying(static_cast<Values>(value));                                        \
+  }                                                                                           \
   _enm_STAT_CEXP size_t hash(_name value, size_t seed) { return hash(value, seed); }          \
   _enm_STAT_CEXP size_t hash(Value value, size_t seed) { return Value::hash(value, seed); }   \
   constexpr _name() : m_data{ Unknown } {}                                                    \

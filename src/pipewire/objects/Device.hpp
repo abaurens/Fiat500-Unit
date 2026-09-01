@@ -2,9 +2,9 @@
 
 #include <pipewire/device.h>
 
-#include "pipewire/Object.hpp"
 #include "pipewire/Bindable.hpp"
 #include "pipewire/MediaClass.hpp"
+#include "pipewire/objects/Object.hpp"
 
 namespace PipeWire
 {

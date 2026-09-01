@@ -1,7 +1,7 @@
 #pragma once
 
-#include "pipewire/Object.hpp"
 #include "pipewire/Direction.hpp"
+#include "pipewire/objects/Object.hpp"
 
 namespace PipeWire
 {

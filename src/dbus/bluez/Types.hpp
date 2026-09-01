@@ -23,9 +23,7 @@ namespace DBus::Bluez
       artist   { firstOr(properties.value("Artist",   {}).toStringList()) },
       album    {         properties.value("Album",    {}).toString()      },
       duration {         properties.value("Duration", {}).toUInt()        }
-    {
-      // qDebug() << "Track Infos:" << properties;
-    }
+    {}
   };
 
 }

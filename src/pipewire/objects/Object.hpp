@@ -106,7 +106,7 @@ namespace PipeWire
     virtual void onPropertyChanged(const QString &name, const QString &value)
     {
     // #ifndef NDEBUG
-    //  Log::debug(u"Object"_s) << "Unhandled property" << name << "changed to" << value;
+    //  Log::debug(u"Object"_s).quote() << "Unhandled property " << name << " changed to " << value;
     // #endif
     }
 

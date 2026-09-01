@@ -33,17 +33,17 @@ namespace Log
     return result;
   }
 
-  static auto info(const QStringView scope = u"/Core"_s)     { return (qInfo().noquote().nospace() << "["<< scope << "]:").quote().space();      }
-  static auto debug(const QStringView scope = u"/Core"_s)    { return (qDebug().noquote().nospace() << "[" << scope << "]:").quote().space();    }
-  static auto fatal(const QStringView scope = u"/Core"_s)    { return (qFatal().noquote().nospace() << "[" << scope << "]:").quote().space();    }
-  static auto warning(const QStringView scope = u"/Core"_s)  { return (qWarning().noquote().nospace() << "[" << scope << "]:").quote().space();  }
-  static auto critical(const QStringView scope = u"/Core"_s) { return (qCritical().noquote().nospace() << "[" << scope << "]:").quote().space(); }
+  static auto info(const QStringView scope = u"/Core"_s)     { return (qInfo().noquote().nospace() << "["<< scope << "]: ");      }
+  static auto debug(const QStringView scope = u"/Core"_s)    { return (qDebug().noquote().nospace() << "[" << scope << "]: ");    }
+  static auto fatal(const QStringView scope = u"/Core"_s)    { return (qFatal().noquote().nospace() << "[" << scope << "]: ");    }
+  static auto warning(const QStringView scope = u"/Core"_s)  { return (qWarning().noquote().nospace() << "[" << scope << "]: ");  }
+  static auto critical(const QStringView scope = u"/Core"_s) { return (qCritical().noquote().nospace() << "[" << scope << "]: "); }
 }
 
-#include "dbus/Log.hpp"  // IWYU pragma: export
-#include "dbus/bluez/Log.hpp"  // IWYU pragma: export
+#include "dbus/Log.hpp"       // IWYU pragma: export
+#include "dbus/bluez/Log.hpp" // IWYU pragma: export
 
-#include "media/Log.hpp"
+#include "media/Log.hpp"       // IWYU pragma: export
 #include "media/audio/Log.hpp" // IWYU pragma: export
 #include "media/video/Log.hpp" // IWYU pragma: export
 

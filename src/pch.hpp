@@ -13,6 +13,8 @@
 #include <unordered_map> // IWYU pragma: export
 
 #include <memory>        // IWYU pragma: export
+#include <concepts>      // IWYU pragma: export
+#include <coroutine>     // IWYU pragma: export
 #include <algorithm>     // IWYU pragma: export
 #include <functional>    // IWYU pragma: export
 

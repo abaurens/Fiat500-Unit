@@ -2,8 +2,8 @@
 
 #include <memory>
 
-template<class T>
-using Scope = std::unique_ptr<T>;
+template<class T, class Deleter = std::default_delete<T>>
+using Scope = std::unique_ptr<T, Deleter>;
 
 template<class T, class... Args>
-Scope<T> make_scope(Args &&... args) { return std::make_unique<T>(std::forward<Args>(args)...); }
+Scope<T> makeScope(Args &&... args) { return std::make_unique<T>(std::forward<Args>(args)...); }
