@@ -38,6 +38,26 @@ namespace Log
   static auto fatal(const QStringView scope = u"/Core"_s)    { return (qFatal().noquote().nospace() << "[" << scope << "]: ");    }
   static auto warning(const QStringView scope = u"/Core"_s)  { return (qWarning().noquote().nospace() << "[" << scope << "]: ");  }
   static auto critical(const QStringView scope = u"/Core"_s) { return (qCritical().noquote().nospace() << "[" << scope << "]: "); }
+
+
+  template<class T>
+  struct padded
+  {
+    u32 padding = 0;
+    const T *const data = nullptr;
+  };
+
+  template<class T>
+  inline padded<T> padd(const T *const data, u32 padding = 0)
+  {
+    return padded<T>{ padding, data };
+  }
+
+  template<class T>
+  inline padded<T> padd(const T &data, u32 padding = 0)
+  {
+    return padded<T>{ padding, &data };
+  }
 }
 
 #include "dbus/Log.hpp"       // IWYU pragma: export

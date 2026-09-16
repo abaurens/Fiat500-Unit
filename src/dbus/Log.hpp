@@ -9,4 +9,6 @@ namespace DBus::Log
   static auto fatal(const QStringView scope = u""_s)    { return ::Log::fatal(::Log::make_path(u"/DBus"_s, scope));    }
   static auto warning(const QStringView scope = u""_s)  { return ::Log::warning(::Log::make_path(u"/DBus"_s, scope));  }
   static auto critical(const QStringView scope = u""_s) { return ::Log::critical(::Log::make_path(u"/DBus"_s, scope)); }
+
+  using namespace ::Log;
 }

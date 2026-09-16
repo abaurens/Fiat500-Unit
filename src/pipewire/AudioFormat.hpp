@@ -1,6 +1,7 @@
 #pragma once
 
 #include <spa/param/audio/format-utils.h>
+#include <spa/debug/types.h>
 
 #include <algorithm>
 
@@ -52,5 +53,13 @@ namespace PipeWire
     u32 channels;
     Channels positions {};
   };
+
+  inline const std::string_view audioChannelName(spa_audio_channel channel)
+  {
+    return spa_debug_type_find_name(
+      spa_type_audio_channel,
+      channel
+    );
+  }
 
 }

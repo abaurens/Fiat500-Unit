@@ -1,6 +1,9 @@
 #include "pch.hpp" // IWYU pragma: keep
 
 #include "Node.hpp"
+#include "pipewire/Manager.hpp"
+
+#include "SignalAwaiter.hpp"
 
 #include <spa/utils/keys.h>
 #include <spa/utils/dict.h>
@@ -9,7 +12,7 @@
 
 using namespace std::literals;
 
-//#include "media/Manager.hpp"
+//#include "pipewire/Manager.hpp"
 //#include "pipewire/Device.hpp"
 
 namespace PipeWire
@@ -44,7 +47,21 @@ namespace PipeWire
 
   const std::optional<AudioFormat> &Node::audioFormat() const
   {
-    return m_audioFormat;
+    return m_audioFormat.optional();
+  }
+
+  AsyncTask<AudioFormat> Node::waitForAudioFormat()
+  {
+    if (m_audioFormat)
+      co_return *m_audioFormat;
+
+    auto [node, format] = co_await waitForSignal(
+      &Manager::instance(),
+      &Manager::nodeAudioFormatChanged,
+      [this](Node &node, AudioFormat &) { return &node == this; }
+    );
+
+    co_return format;
   }
 
   QString Node::name() const
@@ -96,11 +113,11 @@ namespace PipeWire
 
     updateProperties(props);
 
-    //auto *device = Media::Manager::deviceForNode(id());
+    //auto *device = Manager::deviceForNode(id());
     //if (!device || device->api() != "bluez5")
     //  return;
     //
-    //Log::debug(u"Node"_s) << *this << " [" << device->name() << "]<" << device->api() << "> received properties:\n" << props;
+    //Log::debug(u"Node"_s) << *this << " received properties: " << props;
   }
 
   void Node::onStateInfo(pw_node_state state)
@@ -176,6 +193,8 @@ namespace PipeWire
       m_audioFormat->positions[i] = static_cast<spa_audio_channel>(audioInfo.position[i]);
     }
 
+    emit Manager::instance().nodeAudioFormatChanged(*this, *m_audioFormat);
+
     //Log::debug(u"Node"_s) << *this << "audio format changed:";
     //qDebug() << "  "
     //  << "format:" << audioInfo.format
@@ -188,7 +207,6 @@ namespace PipeWire
     //    << "channel[" << i << "] "
     //    << "position: " << audioInfo.position[i];
     //}
-
   }
 
   void Node::onFormatParam(const spa_pod &param)

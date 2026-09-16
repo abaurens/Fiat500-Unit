@@ -4,7 +4,7 @@
 
 #include <spa/utils/dict.h>
 
-// #include "media/Manager.hpp"
+// #include "pipewire/Manager.hpp"
 
 namespace PipeWire
 {
@@ -13,11 +13,11 @@ namespace PipeWire
   {
     //Log::debug(u"Link"_s) << *this << "created:";
     //
-    //const auto *const outputNode = Media::Manager::node(outputNodeId());
-    //const auto *const outputPort = outputNode ? Media::Manager::port(outputPortId()) : nullptr;
+    //const auto *const outputNode = Manager::node(outputNodeId());
+    //const auto *const outputPort = outputNode ? Manager::port(outputPortId()) : nullptr;
     //
-    //const auto *const inputNode = Media::Manager::node(inputNodeId());
-    //const auto *const inputPort = inputNode ? Media::Manager::port(inputPortId()) : nullptr;
+    //const auto *const inputNode = Manager::node(inputNodeId());
+    //const auto *const inputPort = inputNode ? Manager::port(inputPortId()) : nullptr;
     //
     //Log::debug(u"Link"_s)
     //  << "  "

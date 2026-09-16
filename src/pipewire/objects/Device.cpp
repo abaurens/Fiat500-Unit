@@ -13,7 +13,7 @@ namespace PipeWire
     Proxy { proxy, pw_device_add_listener },
     m_mediaClass{ parseMediaClass(propertyOr(SPA_KEY_MEDIA_CLASS, "")) }
   {
-    //Log::debug(u"Device"_s) << *this << " created with properties: " << props;
+    Log::debug(u"Device"_s) << *this << " created with properties: " << props;
   }
 
   QString Device::api() const

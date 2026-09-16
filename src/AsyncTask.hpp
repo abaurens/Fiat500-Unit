@@ -23,9 +23,13 @@ struct AsyncPromiseBase
   std::suspend_never initial_suspend() noexcept { return {}; }
   FinalAwaiter final_suspend() noexcept { return {}; }
 
-  void unhandled_exception() { std::terminate(); }
+  void unhandled_exception() {
+    exception = std::current_exception();
+  }
 
   std::coroutine_handle<> continuation {};
+
+  std::exception_ptr exception;
 };
 
 template<class T = void>
@@ -57,8 +61,14 @@ public:
   void await_suspend(std::coroutine_handle<> continuation) noexcept {
     m_handle.promise().continuation = continuation;
   }
+
   T await_resume() {
-    return std::move(*m_handle.promise().m_value);
+    auto &promise = m_handle.promise();
+
+    if (promise.exception)
+      std::rethrow_exception(promise.exception);
+
+    return std::forward<T>(*m_handle.promise().m_value);
   }
 
   struct promise_type : AsyncPromiseBase<promise_type>
@@ -66,7 +76,9 @@ public:
     AsyncTask get_return_object() { return AsyncTask{ Handle::from_promise(*this) }; }
 
     template<class U>
-    requires std::constructible_from<T, U&&>
+    requires requires(Local<T> &local, U &&value) {
+      local.emplace(std::forward<U>(value));
+    }
     void return_value(U &&value)
     {
       m_value.emplace(std::forward<U>(value));
@@ -117,3 +129,4 @@ public:
 private:
   Handle m_handle;
 };
+

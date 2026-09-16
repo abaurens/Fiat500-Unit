@@ -9,4 +9,6 @@ namespace Media::Audio::Log
   static auto fatal(const QStringView scope = u""_s)    { return ::Media::Log::fatal(::Log::make_path(u"/Audio"_s, scope));    }
   static auto warning(const QStringView scope = u""_s)  { return ::Media::Log::warning(::Log::make_path(u"/Audio"_s, scope));  }
   static auto critical(const QStringView scope = u""_s) { return ::Media::Log::critical(::Log::make_path(u"/Audio"_s, scope)); }
+
+  using namespace ::Media::Log;
 }

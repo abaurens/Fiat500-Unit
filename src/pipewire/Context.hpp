@@ -30,6 +30,8 @@ namespace PipeWire
     void initialize();
     void deinitialize();
 
+    pw_core *core() { return m_core; }
+
     template<class Proxy, u32 MaxVersion>
     Proxy *bindObject(u32 id, u32 version, const char *interfaceType)
     {

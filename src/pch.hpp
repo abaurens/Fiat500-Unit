@@ -12,8 +12,11 @@
 #include <unordered_set> // IWYU pragma: export
 #include <unordered_map> // IWYU pragma: export
 
+#include <limits>        // IWYU pragma: export
 #include <memory>        // IWYU pragma: export
 #include <concepts>      // IWYU pragma: export
+#include <stdexcept>     // IWYU pragma: export
+#include <exception>     // IWYU pragma: export
 #include <coroutine>     // IWYU pragma: export
 #include <algorithm>     // IWYU pragma: export
 #include <functional>    // IWYU pragma: export

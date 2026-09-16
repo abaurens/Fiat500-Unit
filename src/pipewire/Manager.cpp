@@ -1,20 +1,20 @@
 #include "pch.hpp" // IWYU pragma: keep
 
 #include "Manager.hpp"
-#include "pipewire/ObjectAwaiter.hpp"
+// #include "SignalAwaiter.hpp"
 #include "pipewire/objects/Client.hpp"
 
 #define ASSERT_OBJECT_TYPE(id, _type) do {      \
-  [[maybe_unused]] const PipeWire::Object *obj; \
+  [[maybe_unused]] const Object *obj;           \
   Q_ASSERT(                                     \
       (obj = object(id)) != nullptr             \
     && obj->type() == _type::StaticType         \
   );                                            \
 } while (false)
 
-namespace Media
+namespace PipeWire
 {
-  PipeWire::Object *Manager::object(u32 id)
+  Object *Manager::object(u32 id)
   {
     auto it = instance().m_objects.find(id);
 
@@ -24,11 +24,11 @@ namespace Media
     return it->second.get();
   }
 
-  PipeWire::Device *Manager::deviceForNode(u32 nodeId)
+  Device *Manager::deviceForNode(u32 nodeId)
   {
-    ASSERT_OBJECT_TYPE(nodeId, PipeWire::Node);
+    ASSERT_OBJECT_TYPE(nodeId, Node);
 
-    PipeWire::Node *nde = node(nodeId);
+    Node *nde = node(nodeId);
 
     if (!nde)
       return nullptr;
@@ -41,21 +41,21 @@ namespace Media
     return device(*id);
   }
 
-  QList<PipeWire::Link *> Manager::linksForPort(u32 portId, PipeWire::Direction directionFilter)
+  QList<Link *> Manager::linksForPort(u32 portId, Direction directionFilter)
   {
-    ASSERT_OBJECT_TYPE(portId, PipeWire::Port);
+    ASSERT_OBJECT_TYPE(portId, Port);
 
-    QList<PipeWire::Link *> result;
+    QList<Link *> result;
 
-    const bool acceptInput  = (directionFilter != PipeWire::Direction::Out);
-    const bool acceptOutput = (directionFilter != PipeWire::Direction::In);
+    const bool acceptInput  = (directionFilter != Direction::Out);
+    const bool acceptOutput = (directionFilter != Direction::In);
 
     for (auto &[id, object] : instance().m_objects)
     {
-      if (object->type() != PipeWire::Object::Type::Link)
+      if (object->type() != Object::Type::Link)
         continue;
 
-      auto *link = object->safeAs<PipeWire::Link>();
+      auto *link = object->safeAs<Link>();
 
       if (!link)
         continue;
@@ -72,18 +72,18 @@ namespace Media
     return result;
   }
 
-  QList<PipeWire::Port *> Manager::portsForNode(u32 nodeId)
+  QList<Port *> Manager::portsForNode(u32 nodeId)
   {
-    ASSERT_OBJECT_TYPE(nodeId, PipeWire::Node);
+    ASSERT_OBJECT_TYPE(nodeId, Node);
 
-    QList<PipeWire::Port *> result;
+    QList<Port *> result;
 
     for (auto &[id, object] : instance().m_objects)
     {
-      if (object->type() != PipeWire::Object::Type::Port)
+      if (object->type() != Object::Type::Port)
         continue;
 
-      auto *port = object->safeAs<PipeWire::Port>();
+      auto *port = object->safeAs<Port>();
 
       if (port && port->nodeId() == nodeId)
         result.append(port);
@@ -92,18 +92,18 @@ namespace Media
     return result;
   }
 
-  QList<PipeWire::Node *> Manager::nodesForDevice(u32 deviceId)
+  QList<Node *> Manager::nodesForDevice(u32 deviceId)
   {
-    ASSERT_OBJECT_TYPE(deviceId, PipeWire::Device);
+    ASSERT_OBJECT_TYPE(deviceId, Device);
 
-    QList<PipeWire::Node *> result;
+    QList<Node *> result;
 
     for (auto &[id, object] : instance().m_objects)
     {
-      if (object->type() != PipeWire::Object::Type::Node)
+      if (object->type() != Object::Type::Node)
         continue;
 
-      auto *node = object->safeAs<PipeWire::Node>();
+      auto *node = object->safeAs<Node>();
 
       if (!node)
         continue;
@@ -117,13 +117,13 @@ namespace Media
     return result;
   }
 
-  QList<PipeWire::Node *> Manager::connectedNodes(u32 nodeId, PipeWire::Direction direction)
+  QList<Node *> Manager::connectedNodes(u32 nodeId, Direction direction)
   {
-    QHash<u32, PipeWire::Node *> result;
+    QHash<u32, Node *> result;
 
     for (const auto *port : portsForNode(nodeId))
     {
-      if (direction != PipeWire::Direction::Unknown && port->direction() != direction)
+      if (direction != Direction::Unknown && port->direction() != direction)
         continue;
 
       for (const auto *link : linksForPort(port->id(), direction))
@@ -145,13 +145,18 @@ namespace Media
     return result.values();
   }
 
-  PipeWire::ObjectAwaiter Manager::waitForObject(u32 id)
-  {
-    return PipeWire::ObjectAwaiter{ id };
-  }
 
+  //AsyncTask<Object &> Manager::waitForObject(u32 id)
+  //{
+  //  return waitForObject(
+  //    [id](Object &object) { return object.id() == id; }
+  //  );
+  //}
 
-
+  //AsyncTask<Object &> Manager::waitForObject(u32 id)
+  //{
+  //  return ObjectAwaiter{ id };
+  //}
 
   Manager::Manager(QObject *owner) : ManagerType { owner }, m_pipewire{}
   {}
@@ -161,12 +166,12 @@ namespace Media
     Log::debug(u"Manager"_s) << "Initializing";
 
     connect(
-      &m_pipewire, &PipeWire::Context::objectCreated,
+      &m_pipewire, &Context::objectCreated,
       this,        &Manager::onObjectCreated,
       Qt::DirectConnection
     );
     connect(
-      &m_pipewire, &PipeWire::Context::objectRemoved,
+      &m_pipewire, &Context::objectRemoved,
       this,        &Manager::onObjectRemoved
     );
 
@@ -185,30 +190,30 @@ namespace Media
   }
 
   /// Create the objects of which we know and supports the type
-  Scope<PipeWire::Object> Manager::createObject(u32 id, u32 version, PipeWire::Object::Type type, const spa_dict *props)
+  Scope<Object> Manager::createObject(u32 id, u32 version, Object::Type type, const spa_dict *props)
   {
-    Scope<PipeWire::Object> object = nullptr;
+    Scope<Object> object = nullptr;
 
     switch (type)
     {
-    case PipeWire::Object::Type::Node:
-      return makeScope<PipeWire::Node>(id, m_pipewire.bindNode(id, version), props);
+    case Object::Type::Node:
+      return makeScope<Node>(id, m_pipewire.bindNode(id, version), props);
       break;
 
-    case PipeWire::Object::Type::Port:
-      return makeScope<PipeWire::Port>(id, props);
+    case Object::Type::Port:
+      return makeScope<Port>(id, props);
       break;
 
-    case PipeWire::Object::Type::Device:
-      return makeScope<PipeWire::Device>(id, m_pipewire.bindDevice(id, version), props);
+    case Object::Type::Device:
+      return makeScope<Device>(id, m_pipewire.bindDevice(id, version), props);
       break;
 
-    case PipeWire::Object::Type::Link:
-      return makeScope<PipeWire::Link>(id, props);
+    case Object::Type::Link:
+      return makeScope<Link>(id, props);
       break;
 
-    case PipeWire::Object::Type::Client:
-      return makeScope<PipeWire::Client>(id, props);
+    case Object::Type::Client:
+      return makeScope<Client>(id, props);
       break;
 
     default:
@@ -244,16 +249,34 @@ namespace Media
     }
 
     type = type.substr(InterfacePrefix.size());
-    const PipeWire::Object::Type otype = PipeWire::Object::Type::FromName(type);
+    const Object::Type otype = Object::Type::FromName(type);
 
     // Create the object
-    Scope<PipeWire::Object> object = createObject(id, version, otype, props);
+    Scope<Object> object = createObject(id, version, otype, props);
     if (!object)
       return;
 
-    PipeWire::Object &obj = *object;
+    Object &obj = *object;
 
     m_objects.emplace(id, std::move(object));
+
     emit objectAdded(obj);
+    switch (obj.type())
+    {
+    case Object::Type::Node:
+      emit nodeAdded(static_cast<Node&>(obj));
+      break;
+    case Object::Type::Device:
+      emit deviceAdded(static_cast<Device&>(obj));
+      break;
+    case Object::Type::Port:
+      emit portAdded(static_cast<Port&>(obj));
+      break;
+    case Object::Type::Link:
+      emit linkAdded(static_cast<Link&>(obj));
+      break;
+    default:
+      break;
+    }
   }
 }

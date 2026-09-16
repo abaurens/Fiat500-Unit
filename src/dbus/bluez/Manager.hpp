@@ -25,18 +25,18 @@
     MediaPlayer   \
   )
 
-#define DECLARE_MANAGED_OBJECT(_type, _name)                                 \
-    void _name##Added(const Object::Path &path, DBus::Bluez::_type &_name);  \
-    void _name##Removed(const Object::Path &path);                           \
-  public:                                                                    \
-    static _type::Map &_name##s() { return instance().m_##_name##s; }        \
-  private:                                                                   \
-    void addObject(_type &_name);                                            \
-    void removeObject(_type &_name);                                         \
-    bool getObject(const Object::Path &path, _type *(&_name))  {             \
-      return getObjectImpl(m_##_name##s, path, _name);                       \
-    }                                                                        \
-  private:                                                                   \
+#define DECLARE_MANAGED_OBJECT(_type, _name)                                          \
+  public:                                                                             \
+    Q_SIGNAL void _name##Added(const Object::Path &path, DBus::Bluez::_type &_name);  \
+    Q_SIGNAL void _name##Removed(const Object::Path &path);                           \
+    static _type::Map &_name##s() { return instance().m_##_name##s; }                 \
+  private:                                                                            \
+    void addObject(_type &_name);                                                     \
+    void removeObject(_type &_name);                                                  \
+    bool getObject(const Object::Path &path, _type *(&_name))  {                      \
+      return getObjectImpl(m_##_name##s, path, _name);                                \
+    }                                                                                 \
+  private:                                                                            \
     _type::Map m_##_name##s
 
 namespace DBus::Bluez
@@ -82,11 +82,8 @@ namespace DBus::Bluez
     void removeObject(Adapter &device);
     bool getObject(const Object::Path &path, Adapter *(&adapter));
 
-  signals:
     DECLARE_MANAGED_OBJECT(Device,       device);
-  signals:
     DECLARE_MANAGED_OBJECT(MediaControl, mediaControl);
-  signals:
     DECLARE_MANAGED_OBJECT(MediaPlayer,  mediaPlayer);
 
   /**************************\

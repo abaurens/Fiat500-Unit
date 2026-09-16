@@ -2,6 +2,10 @@
 
 #include "SignalAwaiter.hpp"
 
+#include "pipewire/objects/Node.hpp"
+
+#include <QTextStream>
+
 namespace PipeWire
 {
   Filter::Filter(pw_filter *filter) : Super{ filter }
@@ -25,8 +29,11 @@ namespace PipeWire
     spa_hook_remove(&m_listener);
   }
 
-  bool Filter::connect()
+  AsyncTask<bool> Filter::connect()
   {
+    co_await connectIO<SPA_DIRECTION_INPUT>();
+    co_await connectIO<SPA_DIRECTION_OUTPUT>();
+
     const int result = pw_filter_connect(
       handle(),
       PW_FILTER_FLAG_NONE,
@@ -34,11 +41,16 @@ namespace PipeWire
       0
     );
 
-    return result >= 0;
+    co_return result >= 0;
   }
 
   void *Filter::addPort(spa_direction direction, pw_properties *properties, size_t userDataSize)
   {
+    Log::debug(u"Filter"_s) << "Creating Port{\n"
+                            << "  Direction:  " << (direction ? "output" : "input") << '\n'
+                            << "  Properties: " << Log::padd(properties->dict, 1)   << '\n'
+                            << "}";
+
     return pw_filter_add_port(
       handle(),
       direction,
@@ -50,12 +62,12 @@ namespace PipeWire
     );
   }
 
-  AsyncTask<u32> Filter::waitForNodeId() const
+  AsyncTask<u32> Filter::waitForNodeId()
   {
     if (m_nodeId != SPA_ID_INVALID)
       co_return m_nodeId;
 
-    co_return co_await waitForSignal<Filter>(this, &Filter::nodeCreated);
+    co_return co_await waitForSignal(this, &Filter::nodeCreated);
   }
 
   void Filter::onProcess(spa_io_position &position)
@@ -89,10 +101,29 @@ namespace PipeWire
     }
   }
 
+  void Filter::connectInput(Node &node, u32 maxChannels)
+  {
+    m_inputSpec.emplace(&node, maxChannels);
+  }
 
+  void Filter::connectOutput(Node &node, u32 maxChannels)
+  {
+    m_outputSpec.emplace(&node, maxChannels);
+  }
+
+  void Filter::connectInput(Node *node, u32 maxChannels)
+  {
+    Q_ASSERT(node);
+    connectInput(*node, maxChannels);
+  }
+
+  void Filter::connectOutput(Node *node, u32 maxChannels)
+  {
+    Q_ASSERT(node);
+    connectOutput(*node, maxChannels);
+  }
 
 }
-
 
 void PipeWire::Filter::onProcess(void *data, spa_io_position *position)
 {

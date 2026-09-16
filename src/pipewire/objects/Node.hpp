@@ -5,8 +5,9 @@
 #include "pipewire/AudioFormat.hpp"
 #include "pipewire/objects/Object.hpp"
 
-#include <pipewire/node.h>
+#include "AsyncTask.hpp"
 
+#include <pipewire/node.h>
 #include <QStringView>
 
 namespace PipeWire
@@ -24,6 +25,8 @@ namespace PipeWire
 
     std::optional<u32> deviceId() const;
     const std::optional<AudioFormat> &audioFormat() const;
+
+    AsyncTask<AudioFormat> waitForAudioFormat();
 
     QString name() const;
     QString nick() const;
@@ -48,6 +51,9 @@ namespace PipeWire
       os << ss.str();
       return std::forward<OS>(os);
     }
+
+  signals:
+    void audioFormatSet(AudioFormat &format);
 
   private:
     void onStateInfo(pw_node_state state);

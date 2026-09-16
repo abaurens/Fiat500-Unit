@@ -57,6 +57,7 @@ qt_add_executable(${PROJECT_NAME}
     src/Local.hpp
     src/Scope.hpp
     src/AsyncTask.hpp
+    src/DetachedTask.hpp
     src/SignalAwaiter.hpp
     src/AbstractManager.hpp
     src/CaseInsensitiveCharTrait.hpp
@@ -108,9 +109,6 @@ qt_add_executable(${PROJECT_NAME}
     src/media/Sink.hpp
     src/media/Source.hpp
 
-
-    src/media/Manager.hpp src/media/Manager.cpp
-
     src/media/audio/Log.hpp
     src/media/audio/Sink.hpp src/media/audio/Sink.cpp
     src/media/audio/Source.hpp src/media/audio/Source.cpp
@@ -126,8 +124,9 @@ qt_add_executable(${PROJECT_NAME}
     src/pipewire/MediaClass.hpp
     src/pipewire/AudioFormat.hpp
 
+    src/pipewire/Manager.hpp src/pipewire/Manager.cpp
     src/pipewire/Context.hpp src/pipewire/Context.cpp
-    src/pipewire/ObjectAwaiter.hpp src/pipewire/ObjectAwaiter.cpp
+
 
     src/pipewire/objects/Link.hpp src/pipewire/objects/Link.cpp
     src/pipewire/objects/Node.hpp src/pipewire/objects/Node.cpp
@@ -138,7 +137,7 @@ qt_add_executable(${PROJECT_NAME}
 
     src/pipewire/handles/Handle.hpp
     src/pipewire/handles/Filter.hpp src/pipewire/handles/Filter.cpp
-    src/DetachedTask.hpp
+    src/TimeoutError.hpp
 )
 
 target_precompile_headers(${PROJECT_NAME}
