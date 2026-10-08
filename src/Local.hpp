@@ -16,7 +16,7 @@ public:
   // Construct from value
   constexpr Local(const T &value) : m_value{ value }
   {}
-  constexpr Local(T &&value) : m_value{ std::move(value) }
+  constexpr Local(T &&value) noexcept : m_value{ std::move(value) }
   {}
 
   // Construct from optional

@@ -68,7 +68,7 @@ public:
     if (promise.exception)
       std::rethrow_exception(promise.exception);
 
-    return std::forward<T>(*m_handle.promise().m_value);
+    return std::forward<T>(*promise.m_value);
   }
 
   struct promise_type : AsyncPromiseBase<promise_type>

@@ -137,7 +137,15 @@ static DetachedTask testPipeWire()
       return true;
     };
 
-    //co_await waitForSignal<QMainWindow>(&App::instance().window(), &QMainWindow::iconSizeChanged).timeout(0s);
+    const QSize constsize{42, 84};
+    QSize size{};
+    try {
+      size = co_await waitForSignal<QMainWindow>(&App::instance().window(), &QMainWindow::iconSizeChanged).timeout(5s, constsize);
+    } catch (const TimeoutError &) {
+      Log::critical(u"Coroutine Tests"_s) << "waitForSignal timed out!";
+      co_return;
+    }
+    Log::critical(u"Coroutine Tests"_s) << "waitForSignal returned { " << size.width() << ", " << size.height() << " }";
 
     PipeWire::Device &bluetoothDevice = co_await PipeWire::Manager::waitFor<PipeWire::Device>(deviceFilter);
 

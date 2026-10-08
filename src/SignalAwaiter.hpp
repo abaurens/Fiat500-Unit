@@ -1,9 +1,6 @@
 #pragma once
 
-#include <QObject>
-#include <QTimer>
-
-#include "TimeoutError.hpp"
+#include <AbstractAwaiter.hpp>
 
 template<class... Args>
 struct SignalResult
@@ -18,17 +15,13 @@ struct SignalResult<>
 { using Type = void; };
 
 template<class Sender, class Predicate, class... Args>
-class SignalAwaiter
+class SignalAwaiter : public AbstractAwaiter<typename SignalResult<Args...>::Type>
 {
-  using Conn = QMetaObject::Connection;
   using ArgsTuple = std::tuple<Args...>;
 
   static constexpr size_t resultCount = sizeof...(Args);
-
-  template<size_t I>
-  using ArgType = std::tuple_element_t<I, ArgsTuple>;
-  using ResultTypes = std::tuple<void, ArgType<0>, ArgsTuple>;
   using ResultType = typename SignalResult<Args...>::Type;
+  using Super = AbstractAwaiter<ResultType>;
 
 public:
   using Signal = void (Sender::*)(Args...);
@@ -37,73 +30,25 @@ public:
     : m_sender{ sender }, m_signal{ signal }, m_predicate{ std::move(predicate) }
   {}
 
-  ~SignalAwaiter()
+  virtual ~SignalAwaiter() = default;
+
+  virtual void arm() override
   {
-    cancel();
-  }
-
-  void cancel()
-  {
-    // disarm the timeout
-    if (m_timeoutCon)
-      QObject::disconnect(m_timeoutCon);
-
-    // disconnect the target signal
-    if (m_targetCon)
-      QObject::disconnect(m_targetCon);
-
-    m_timer.stop();
-  }
-
-  bool await_ready() const noexcept { return false; }
-
-  void await_suspend(std::coroutine_handle<> coroutine)
-  {
-    m_targetCon = QObject::connect(
+    this->connect(
       m_sender, m_signal,
-      [this, coroutine](Args... args)
+      [this](Args... args)
       {
         if (!m_predicate(args...))
           return;
 
         m_args.emplace(std::forward<Args>(args)...);
-        cancel();
-        coroutine.resume();
+        this->resume();
       }
     );
-
-    if (m_timeout)
-    {
-      m_timer.setSingleShot(true);
-      m_timer.setInterval(*m_timeout);
-
-      m_timeoutCon = QObject::connect(
-        &m_timer, &QTimer::timeout,
-        [this, coroutine]
-        {
-          m_timedOut = true;
-
-          cancel();
-          coroutine.resume();
-        }
-      );
-
-      m_timer.start();
-    }
   }
 
-  ResultType await_resume()
+  virtual ResultType result() override
   {
-    if (m_timedOut)
-    {
-      if constexpr (!std::is_void_v<ResultType>)
-      {
-        if (m_default)
-          return std::forward<ResultType>(*m_default);
-      }
-      throw TimeoutError{};
-    }
-
     if constexpr (resultCount == 1)
       return std::get<0>(std::move(*m_args));
     else if constexpr (resultCount > 1)
@@ -115,22 +60,20 @@ public:
   template<class Rep, class Period>
   SignalAwaiter &timeout(std::chrono::duration<Rep, Period> duration)
   {
-    m_timeout.emplace(
-      std::chrono::duration_cast<std::chrono::milliseconds>(duration)
-    );
-
+    Super::timeout(duration);
     return *this;
   }
 
   template<class Rep, class Period, class U> requires (
     !std::is_void_v<ResultType> &&
-    requires(Local<ResultType> &local, U &&value) { local.emplace(std::forward<U>(value)); }
+    requires(Super &super, std::chrono::duration<Rep, Period> duration, U &&value) {
+      super.timeout(duration, std::forward<U>(value));
+    }
   )
   SignalAwaiter &timeout(std::chrono::duration<Rep, Period> duration, U &&defaultValue)
   {
-    m_default.emplace(std::forward<U>(defaultValue));
-
-    return timeout(duration);
+    Super::timeout(duration, std::forward<U>(defaultValue));
+    return *this;
   }
 
 private:
@@ -140,15 +83,7 @@ private:
   Predicate m_predicate;
 
   // Coroutine Metadata
-  Conn m_targetCon;
-  Conn m_timeoutCon;
   Local<ArgsTuple> m_args;
-
-  // Timeout system
-  Local<std::chrono::milliseconds> m_timeout;
-  bool m_timedOut = false;
-  QTimer m_timer;
-  Local<ResultType> m_default; // Default value to be returned on timeout
 };
 
 template<class Sender, class... Args>

@@ -57,8 +57,11 @@ qt_add_executable(${PROJECT_NAME}
     src/Local.hpp
     src/Scope.hpp
     src/AsyncTask.hpp
+    src/TimeoutError.hpp
     src/DetachedTask.hpp
     src/SignalAwaiter.hpp
+    src/AbstractAwaiter.hpp
+    src/TimeoutableTask.hpp
     src/AbstractManager.hpp
     src/CaseInsensitiveCharTrait.hpp
 
@@ -137,7 +140,8 @@ qt_add_executable(${PROJECT_NAME}
 
     src/pipewire/handles/Handle.hpp
     src/pipewire/handles/Filter.hpp src/pipewire/handles/Filter.cpp
-    src/TimeoutError.hpp
+
+
 )
 
 target_precompile_headers(${PROJECT_NAME}
